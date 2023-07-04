@@ -1,0 +1,88 @@
+{% extends 'base1.html' %}
+
+
+{% block content %}
+<div class="cart-table-area section-padding-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="cart-title mt-50">
+                    <h2>Delivery address</h2>
+                </div>
+
+                <div class="cart-table clearfix bg-light">
+                    <table class="table table-responsive ">
+                        
+                        <tbody>
+                            <tr>
+                              <label>
+                                <div class="row mt-3 ml-3">
+                                  
+                                  <div class="row col-md-5">
+                                    <div class="col-md-6">
+                                      <h5 class="text-uppercase">{{ address.fullname }}</h5>
+                                    </div>
+                                    <div class="col-md-12">
+                                      <div><h5>{{ address.address }}</h5></div>
+                                      <div><h5>{{ address.street }}</h5></div>
+                                      <div><h5>{{ address.city }}</h5></div>
+                                      <div><h5>{{ address.state }}</h5></div>
+                                      <div><h5>Pincode:{{ address.pincode }}</h5></div>
+                                      <div><h5 >Ph:{{ address.contact }}</h5></div>
+                                    </div>
+                                  </div>
+                                   
+                                </div>
+                              </label>
+                            </tr>
+
+
+
+                         
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="cart-summary">
+                    <h5>Payment</h5>
+                   
+                    <div class="payment-method mt-3">
+                        <!-- Cash on delivery -->
+                        <div class="custom-control custom-checkbox mr-sm-2">
+                            <input type="checkbox" class="custom-control-input payment-checkbox" id="cod" checked>
+                            <label class="custom-control-label" for="cod">Cash on Delivery</label>
+                        </div>
+                        <!-- Paypal -->
+                        <div class="custom-control custom-checkbox mr-sm-2">
+                            <input type="checkbox" class="custom-control-input payment-checkbox" id="paypal">
+                            <label class="custom-control-label" for="paypal">Paypal <img class="ml-15" src="img/core-img/paypal.png" alt=""></label>
+                        </div>
+                    </div>
+                    <div class="cart-btn mt-100">
+                      <a href="{% url 'place_order' address.id %}"><button type="button" class="btn amado-btn w-100" id="proceed-payment-btn">Place Order</button></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8">
+                <div class="col-12 col-lg-12">
+                    <div class="cart-summary">
+                        <h5>Cart Total</h5>
+                        <ul class="summary-table">
+                            <li><span>subtotal:</span> <span>${{total_price}}</span></li>
+                            <li><span>delivery:</span> <span>Free</span></li>
+                            <li><span class='font-weight-bold'>total:</span> <span>${{total_price}}</span></li>
+                        </ul>
+                       
+                    </div>
+                </div>
+            </div>
+           
+            
+        </div>
+    </div>
+</div>
+</div>      
+
+
+{% endblock  %}

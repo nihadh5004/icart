@@ -1,0 +1,208 @@
+
+{% extends 'base1.html' %}
+{% load static %}
+
+
+{% block links %}
+<link rel="stylesheet" href="{% static 'css/css/core-style.css' %}">
+<link rel="stylesheet" href="{% static 'css/style1.css'%}">
+<link rel="stylesheet" href="{% static 'css/style2.css'%}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<style>
+    .zoomContainer {
+       
+        z-index: 9999 ;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+  
+
+        <!-- Product Details Area Start -->
+        <div class="single-product-area section-padding-100 clearfix">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mt-50">
+                                <li class="breadcrumb-item"><a href="#">Shop</a></li>
+                                <li class="breadcrumb-item"><a href="#">{{product.category}}</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">{{product.name}}</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-7">
+                        <div class="single_product_thumb">
+                            <div id="product_details_slider" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">
+                                    <li class="active" data-target="#product_details_slider" data-slide-to="0" style="background-image: url('{{productvariant.displayimage.url}}'); ">
+                                    </li>
+                                    {% for product in productvariant.productimage_set.all %}
+                                    <li data-target="#product_details_slider" data-slide-to="{{forloop.counter}}" style="background-image: url('{{product.image.url}}'); ">
+                                    </li>
+                                    {% endfor %}
+                                    
+                                </ol>
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active" id="img-container">
+                                        <a class="gallery_img" href="{{productvariant.displayimage.url}}">
+                                            <img class="d-block img_size zoom" src="{{productvariant.displayimage.url}}" alt="First slide" id="zoom"  data-magnify-src="{{ product.displayimage.url }}" data-zoom-image="{{ product.image.url }} "  >
+                                            
+                                        </a>
+                                    </div>
+                                    {% for product in productvariant.productimage_set.all %}
+                                    <div class="carousel-item">
+                                        <a class="gallery_img" href="{{product.image.url}}">
+                                            <img class="d-block img_size zoom" src="{{product.image.url}}" alt="First slide" id="zoom"  data-magnify-src="{{ product.image.url }}" data-zoom-image="{{ product.image.url }} "  >
+                                            
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-5">
+                        <div class="single_product_desc">
+                            <!-- Product Meta Data -->
+                            <div class="product-meta-data">
+                                <div class="line"></div>
+                                <p class="product-price">${{productvariant.price}}</p>
+                                <a href="product-details.html">
+                                    <h6>{{product.name}}({{productvariant.color}},{{productvariant.storage}})</h6>
+                                </a>
+                                <!-- Ratings & Review -->
+                                <div class="ratings-review mb-15 d-flex align-items-center justify-content-between">
+                                    <div class="ratings">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="review">
+                                        <a href="#">Write A Review</a>
+                                    </div>
+                                </div>
+                                <!-- Avaiable -->
+                                <p class="avaibility"><i class="fa fa-circle"></i> In Stock</p>
+                            </div>
+
+                            <div class="short_overview my-5">
+                                <p>{{product.description}}</p>
+                            </div>
+                            
+                            <div class="widget color mb-50">
+                                <!-- Widget Title -->
+
+                                <div class="">
+                                    <ul class="d-flex ">
+                                        {% for storage in storages %}
+                                        <button type="button" class="btn {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
+                                            <a href="{% url 'product_detail' product.slug %}?color={{ productvariant.color }}&storage={{ storage }}">
+                                                {{ storage }}</a>
+                                        </button>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <h6 class="widget-title mb-30">Available Colors</h6>
+                        
+                                <div class="">
+                                    <ul class="d-flex ">
+                                        {% for color in colors %}
+                                        <button type="button" class="btn {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
+                                            <a href="{% url 'product_detail' product.slug %}?color={{ color }}&storage={{ productvariant.storage }}">
+                                                {{ color }}</a>
+                                        </button>
+                                        {% endfor %}
+                                      
+                                      </ul>
+                                </div>
+                            </div>
+                        
+
+                            <!-- Add to Cart Form -->
+                            <form class="cart clearfix" method="post" action="{% url 'addcart' productvariant.slug  %}">
+                                {% csrf_token %}
+                                <div class="cart-btn d-flex mb-50">
+                                    <p>Qty</p>
+                                    <div class="quantity">
+                                        <span class="qty-minus" onclick="var effect = document.getElementById('qty'); var qty = effect.value; if( !isNaN( qty ) &amp;&amp; qty &gt; 1 ) effect.value--;return false;"><i class="fa fa-caret-down" aria-hidden="true"></i></span>
+                                        <input type="number" class="qty-text" id="qty" step="1" min="1" max="300" name="quantity" value="1">
+                                        <span class="qty-plus" onclick="var effect = document.getElementById('qty'); var qty = effect.value; if( !isNaN( qty )) effect.value++;return false;"><i class="fa fa-caret-up" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                                <button type="submit" name="addtocart" value="5" class="btn amado-btn">Add to cart</button> 
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mb-4 mt-4">
+                <h2 class="section-title px-5"><span class="px-2">You May Also Like</span></h2>
+            </div>
+            
+            
+            <div class="d-flex">
+                {% for related_product in related_products %}
+                  <div class="card ml-5" style="width: 18rem;">
+                    <img class="card-img-top" src="{{ related_product.displayimage.url }}" alt="Product Image">
+                    <div class="card-body">
+                     <a href="{% url 'product_detail' related_product.slug %}"> <h3 class="card-title text-center">{{ related_product.name }}</h3></a>
+                      <h5 class="card-title text-center">{{ related_product.price }}</h5>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              
+        </div>
+        
+            
+        
+        <!-- Product Details Area End -->
+    </div>
+    <!-- ##### Main Content Wrapper End ##### -->
+     <!-- Products Start -->
+     
+    <!-- Products End -->
+
+
+
+    
+    <script src="{%static 'js/zoom/jquery.magnify.js'%}"  charset="utf-8"></script>
+    <script>
+        $(document).ready(function() {
+          $('.zoom').magnify();
+          });
+      </script>
+      
+ <!--### for zoom like amazon websie #### -->
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js" ></script>
+    <script>
+        $("#zoom").elevateZoom({
+            zoomWindowPosition: 1 
+        });
+
+    </script> {% endcomment %}
+    
+    <!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
+    {% comment %} <script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script> {% endcomment %}
+    <!-- Popper js -->
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <!-- Bootstrap js -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- Plugins js -->
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <!-- Active js -->
+    <script src="{% static 'js/active.js' %}"></script>
+   
+{% endblock  %}

@@ -1,0 +1,54 @@
+{% extends 'base1.html' %}
+
+{% block content %}
+<section class="h-100 ">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col">
+          <div class="card card-registration my-4">
+            <div class="row g-0">
+              <div class="col-xl-6 d-none d-xl-block">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/img4.webp"
+                  alt="Sample photo" class="img-fluid"
+                  style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
+              </div>
+              <div class="col-xl-6">
+                <div class="card-body mt-5 py-5 text-black">
+                  <h3 class="mb-5 ">Sign Up form</h3>
+
+                 <form action="/signup" method='post'>
+                  {% csrf_token %}
+                  <div class="form-outline mb-4 mt-2 py-2">
+                      <label class="form-label" for="form3Example8">Username</label>
+                    <input type="text" id="form3Example8" name='username' class="form-control form-control-lg " />
+                  </div>
+
+                  <div class="form-outline mb-4 mt-2 py-2">
+                      <label class="form-label" for="form3Example8">Enter Your email</label>
+                    <input type="email" id="form3Example8" name='email' class="form-control form-control-lg " />
+                  </div>
+  
+  
+                  <div class="form-outline mb-4 py-2">
+                      <label class="form-label" for="form3Example9">Enter Password</label>
+                      <input type="password" id="form3Example9" name='pass1' class="form-control form-control-lg" />
+                  </div>
+                  <div class="form-outline mb-4 py-2">
+                      <label class="form-label" for="form3Example9">Confirm Password</label>
+                      <input type="password" id="form3Example9" name='pass2' class="form-control form-control-lg" />
+                  </div>
+  
+                  <div class="d-flex justify-content-center pt-3 ">
+                  
+                    <button type="submit" class="btn btn-dark w-50 ">Submit</button>
+                  </div>
+                 </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock  %}

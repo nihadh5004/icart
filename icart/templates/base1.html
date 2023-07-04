@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link rel="stylesheet" href="{% static 'css/css/core-style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <link rel="stylesheet" href="{%static 'js/zoom/magnify.css'%}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Title  -->
+    <title>iCart</title>
+    {% block links %}
+
+    {% endblock  %}
+    <!-- Favicon  -->
+    <link rel="icon" href="img/core-img/favicon.ico">
+    <link rel="stylesheet" href="{% static 'css/css/core-style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style1.css' %}">
+    
+
+</head>
+
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+{% for message in messages %}
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>{{message}}</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endfor %} 
+{% block home_slider %}
+{% endblock  %}
+
+  <div class="content" style="flex: 1;">
+
+
+
+    <!-- Search Wrapper Area Start -->
+    <div class="search-wrapper section-padding-100">
+        <div class="search-close">
+            <i class="fa fa-close" aria-hidden="true"></i>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="search-content">
+                        <form action="#" method="get">
+                            <input type="search" name="search" id="search" placeholder="Type your keyword...">
+                            <button type="submit"><img src="img/core-img/search.png" alt=""></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Search Wrapper Area End -->
+
+    <!-- ##### Main Content Wrapper Start ##### -->
+    <div class="main-content-wrapper d-flex clearfix  ">
+
+        <!-- Mobile Nav (max width 767px)-->
+        <div class="mobile-nav ">
+            <!-- Navbar Brand -->
+            <div class="amado-navbar-brand">
+                <a href="index.html"><img src="img/core-img/logo.png" alt=""></a>
+            </div>
+            <!-- Navbar Toggler -->
+            <div class="amado-navbar-toggler">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Header Area Start -->
+        <header class="header-area bg-light clearfix  ">
+            <!-- Close Icon -->
+            <div class="nav-close">
+                <i class="fa fa-close" aria-hidden="true"></i>
+            </div>
+            <!-- Logo -->
+            <div class="logo d-flex ">
+                <a href="index.html"><img src="https://static.vecteezy.com/system/resources/previews/005/544/718/original/profile-icon-design-free-vector.jpg" alt="" width="50px" height="50px"></a>
+                <h5 class=" text-uppercase">Hello {{request.user.username}}</h5>
+            </div>
+            <!-- Amado Nav -->
+            <nav class="amado-nav ">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="">Wishlist</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/profile_details">My Profile</a></li>
+                    
+                </ul>
+            </nav>
+            <!-- Button Group -->
+            <div class="amado-btn-group mt-30 mb-100">
+              {% if request.user.is_authenticated %}
+                <a href="/signout" class="btn amado-btn  mb-15">Logout</a>
+              {% else %}
+                <a href="/signin" class="btn amado-btn mb-15">Login</a>
+              {% endif %}
+            </div>
+            <!-- Cart Menu -->
+            <div class="cart-fav-search mb-100">
+                <a href="/cart" class="cart-nav"><img src="img/core-img/cart.png" alt=""> Cart <span>(0)</span></a>
+                <a href="#" class="fav-nav"><img src="img/core-img/favorites.png" alt=""> Favourite</a>
+                <a href="#" class="search-nav"><img src="img/core-img/search.png" alt=""> Search</a>
+            </div>
+         
+        </header>
+        <!-- Header Area End -->
+
+       {% block content %}
+
+       {% endblock  %}
+    </div>
+    <footer class="bg-dark text-center text-white">
+        <!-- Footer Links -->
+        <div class="container-fluid  text-center text-md-left">
+          <!-- Grid row -->
+          <div class="row">
+            <!-- Grid column -->
+            <div class="col-md-3 mt-3 mt-md-0 ">
+              <!-- Content -->
+              <p class="h2 mt-3 footer_text">a complete<br>apple<br>solution on<br>your<br>fingertips.</p>
+            </div>
+            <!-- Grid column -->
+            <!-- Grid column -->
+            <div class="col-md-6 mt-5 mb-md-0 mb-3">
+              <p class="mb-2" style="font-family: Century Gothic;">Drop your email here to get the latest updates on Apple products</p>
+              <div class="input-group">
+                <input type="search" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="search-addon">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-outline-primary">Search</button>
+                </div>
+              </div>
+            </div>
+            <!-- Grid column -->
+            <!-- Grid column -->
+            <div class="col-md-3 mt-5 mb-md-0 mb-3">
+              <!-- Links -->
+              <h5 class="py-2 footer_text">Contact Us</h5>
+              <ul class="list-unstyled">
+                <li class="footer_text">
+                  icart@yahoo.co.in
+                </li>
+                <li class="footer_text">
+                  +919546293453
+                </li>
+                <li>
+                  <div class="d-flex justify-content-center">
+                    <!-- Facebook -->
+                    <a class="btn btn-floating m-1" href="#!" role="button"><i class="fa fa-facebook-f"></i></a>
+                    <!-- Twitter -->
+                    <a class="btn btn-floating m-1" href="#!" role="button"><i class="fa fa-twitter"></i></a>
+                    <!-- Google -->
+                    <a class="btn btn-floating m-1" href="#!" role="button"><i class="fa fa-google"></i></a>
+                    <!-- Instagram -->
+                    <a class="btn btn-floating m-1" href="#!" role="button"><i class="fa fa-instagram"></i></a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <!-- Grid column -->
+          </div>
+          <!-- Grid row -->
+        </div>
+        <!-- Footer Links -->
+        <!-- Bottom Text -->
+        <div class="text-center py-2" style="font-family: Century Gothic; background-color: rgba(0, 0, 0, 0.2);">
+          If you need any assistance regarding Apple products, we're happy to serve you.
+        </div>
+        <!-- Bottom Text -->
+      </footer>
+      
+
+
+    
+
+</body>
+
+</html>

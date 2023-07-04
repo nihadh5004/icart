@@ -1,0 +1,76 @@
+{% extends 'base1.html' %}
+{% load static %}
+{% block home_slider %}
+<div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        {% for item in sliders %}
+        <li data-target="#myCarousel" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></li>
+        {% endfor %}
+      </ol>
+    
+  <div class="carousel-inner">
+    {% for item in sliders %}
+    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+      <img src="{{ item.Image }}" alt="{{ item.name }}" class="d-block w-100">
+      <div class="carousel-caption ">
+          <p class='text-left ' style='font-family:Century Gothic; '>{{ item.Discount_deals }}</p>
+        <h3 class='text-left  font-weight-bold'>{{ item.Product_name }}</h3>
+        <h1 class='text-left'>Discount sale of {{ item.Sale }}%</h1>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+
+{% endblock  %}
+
+{% block content %}
+<!-- Product Catagories Area Start -->
+<div class="products-catagories-area  clearfix">
+    <div class="amado-pro-catagory  clearfix">
+        {% for product in latest_products %}
+            <!-- Single Catagory -->
+            <div class="single-products-catagory clearfix">
+              {% with variant=product.productvariant_set.all|random %}
+              <a href="{% url 'product_detail' product.slug %}?color={{ variant.color }}&storage={{ variant.storage }}">
+                <img src="{{ variant.displayimage.url }}" alt="{{ product.name }}">
+                    <!-- Hover Content -->
+                    <div class="hover-content">
+                        <div class="line"></div>
+                        <p>{{variant.storage}}</p>
+                        <p>From ${{ variant.price }}</p>
+                        <h4>{{ product.name }}</h4>
+                    </div>
+                </a>
+              {% endwith %}
+            </div>
+        
+        {% endfor %}
+    </div>
+</div>
+
+  <!-- Product Catagories Area End -->
+</div>
+<!-- ##### Main Content Wrapper End ##### -->
+<!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
+    <script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script>
+    <!-- Popper js -->
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <!-- Bootstrap js -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- Plugins js -->
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <!-- Active js -->
+    <script src="{% static 'js/active.js' %}"></script>
+
+{% endblock  %}

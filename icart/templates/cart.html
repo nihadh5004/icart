@@ -1,0 +1,117 @@
+{% extends 'base1.html' %}
+
+
+{% block links %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+
+
+{% endblock  %}
+{% block content %}
+<div class="cart-table-area section-padding-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="cart-title mt-50">
+                    <h2>Shopping Cart</h2>
+                </div>
+
+                <div class="cart-table clearfix">
+                    <table class="table table-responsive">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td class="cart_product_img">
+                                    <a href="#"><img src="{{product.product.displayimage.url}}" alt="Product"></a>
+
+                                </td>
+                               
+                                <td class="cart_product_desc">
+                                    <h5>{{product.product.product.name}}</h5>
+                                    <h5>({{product.product.color}},{{product.product.storage}})</h5>
+                                    <a href="{% url 'removecart' product.id %}"><button class="btn btn-outline-secondary mt-3">Delete</button></a>
+
+                                </td>
+                                <td class="price">
+                                    <span>${{product.price}}</span>
+                                </td>
+                                <td class="qty">
+                                    <div class="qty-btn d-flex">
+                                        <p>Qty</p>
+                                        <div class="quantity">
+                                            <span class="qty-minus" onclick="var effect = document.getElementById('qty{{ product.id }}'); var qty = effect.value; if( !isNaN( qty ) &amp;&amp; qty &gt; 1 ) { effect.value--; updateQuantity({{ product.id }}, effect.value); } return false;"><i class="fa fa-minus" aria-hidden="true"></i></span>
+                                            <input type="number" class="qty-text" id="qty{{ product.id }}" step="1" min="1" max="300" name="quantity" value="{{ product.quantity }}" onchange="updateQuantity({{ product.id }}, this.value);">
+                                            <span class="qty-plus" onclick="var effect = document.getElementById('qty{{ product.id }}'); var qty = effect.value; if( !isNaN( qty )) { effect.value++; updateQuantity({{ product.id }}, effect.value); } return false;"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="cart-summary">
+                    <h5>Cart Total</h5>
+                    <ul class="summary-table">
+                        <li><span>subtotal:</span> <span>${{total_price}}</span></li>
+                        <li><span>delivery:</span> <span>Free</span></li>
+                        <li><span>total:</span> <span>${{total_price}}</span></li>
+                    </ul>
+                    <div class="cart-btn mt-100">
+                        <a href="{%url 'checkout' %}" class="btn amado-btn w-100">Checkout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function updateQuantity(productId, quantity) {
+    $.ajax({
+      type: "POST",
+      url: "/update_quantity",  // Replace with the actual URL of your Django view
+      headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Add this line to include the CSRF token
+      data: {
+          product_id: productId,
+          quantity: quantity
+        },
+        dataType: 'json',  // Expect JSON response from the server
+        success: function(response) {
+            console.log(response.price);
+            console.log(response.quantity);
+            if (response.success) {
+                // Update the displayed quantity and price
+                $("#price-" + productId).text(response.price);
+          $("#quantity-" + productId).text(response.quantity);
+          console.log("Quantity updated successfully!");
+        } else {
+          console.log("Quantity update failed:", response.message);
+        }
+      },
+      error: function(xhr, errmsg, err) {
+        console.log("Error updating quantity:", errmsg);
+      }
+    });
+  }
+</script>
+
+
+
+
+{% endblock  %}

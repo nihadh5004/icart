@@ -1,0 +1,54 @@
+{% extends 'base1.html' %}
+
+
+{% block content %}
+<div class="cart-table-area section-padding-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="checkout_details_area mt-50 clearfix">
+
+                    <div class="cart-title">
+                        <h2>Add new Address</h2>
+                    </div>
+
+                    <form action="/add_address" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            
+                            <div class="col-12 mb-3">
+                                <input type="text" class="form-control" name='fullname' id="company" placeholder="Full Name" value="">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <input type="text" class="form-control" id="company" name='address' placeholder="Address" value="">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <input type="text" class="form-control" id="email" name='street' placeholder="Street" value="">
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <input type="text" class="form-control mb-3" id="street_address" name='city' placeholder="City" value="">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <input type="text" class="form-control" id="city" placeholder="State" name='state' value="">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <input type="text" class="form-control" id="zipCode" name='pincode' placeholder="Pin Code" value="">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <input type="number" class="form-control" name='phone' placeholder="Phone No" value="">
+                            </div>
+                           
+
+                           
+                        </div>
+                        <button class='btn btn-outline-success ml-4 px-4 mt-5 ' type='submit'>Save Address</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock  %}

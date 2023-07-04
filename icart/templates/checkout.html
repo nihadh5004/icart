@@ -1,0 +1,109 @@
+{% extends 'base1.html' %}
+{% block links %}
+<style>
+  .address-checkbox:checked+span {
+    color: blue;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="cart-table-area section-padding-100">
+  <div class="container-fluid ">
+    <div class="row">
+      <div class="col-12 col-lg-12">
+        <div class="cart-title mt-50">
+          <h2>Delivery address</h2>
+        </div>
+
+        <div class="row">
+          {% for address in addresses %}
+          <div class="col-md-6">
+            <div class="cart-table clearfix bg-light col-lg-12 col-12">
+              <table class="table table-responsive">
+                <tbody>
+                  <tr>
+                    <label>
+                      <div class="row mt-5">
+                        <div class="col-md-2">
+                          <input type="checkbox" class="address-checkbox" name="address-checkbox">
+                        </div>
+                        <div class="col-md-8">
+                          <div class="row">
+                            <div class="col-md-8">
+                              <h5 class="text-uppercase">{{ address.fullname }}</h5>
+                            </div>
+                            <div class="col-md-4">
+                              <h5 class="col-md-12">Ph: {{ address.contact }}</h5>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <div>{{ address.address }}</div>
+                              <div>{{ address.street }}</div>
+                              <div>{{ address.city }}</div>
+                              <div>{{ address.state }}</div>
+                              <div>{{ address.pincode }}</div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <a href="{% url 'edit_address'  address.id %}">
+                                <button class="btn btn-outline-secondary deliver-btn" style="display: none;">Edit Address</button>
+                              </a>
+                              <a href="{% url 'payment_page' address.id %}">
+                                <button class="btn btn-outline-success deliver-btn mt-2" style="display: none;">Deliver Here</button>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <button class='btn btn-outline-secondary'>
+              <a href="/add_address">
+                <h4>Add new address</h4>
+              </a>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.address-checkbox').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('.address-checkbox').not(this).prop('checked', false).closest('.row').find('.deliver-btn').hide();
+        $(this).closest('.row').find('.deliver-btn').show();
+      } else {
+        $(this).closest('.row').find('.deliver-btn').hide();
+      }
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('.payment-checkbox').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('.payment-checkbox').not(this).prop('checked', false)
+      }
+    });
+  });
+</script>
+
+{% endblock %}

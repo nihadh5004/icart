@@ -1,0 +1,176 @@
+{% extends 'base1.html' %}
+{% load static %}
+{% block content %}
+<div class="shop_sidebar_area">
+
+    <!-- ##### Single Widget ##### -->
+    <div class="widget catagory mb-50">
+        <!-- Widget Title -->
+        <h6 class="widget-title mb-30">Categories</h6>
+
+        <!--  Catagories  -->
+        <div class="catagories-menu">
+            <ul>
+                <li ><a href="/shop">All categories</a></li>
+                {% for category in  categories %}
+                    {% if category.id == category_id %}
+                    <li class="active"><a href="?category={{ category.id }}" >{{ category.category_name }}</a></li>
+                    {% else %}
+                    <li><a href="?category={{ category.id }}">{{ category.category_name }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    
+
+    <!-- ##### Single Widget ##### -->
+    <div class="widget color mb-50">
+        <!-- Widget Title -->
+        <h6 class="widget-title mb-30">Color</h6>
+
+        <div class="widget-desc">
+            <ul class="d-flex">
+                <li><a href="#" class="color1"></a></li>
+                <li><a href="#" class="color5"></a></li>
+               
+            </ul>
+        </div>
+    </div>
+
+    <!-- ##### Single Widget ##### -->
+    <div class="widget price mb-50">
+        <!-- Widget Title -->
+        <h6 class="widget-title mb-30">Price</h6>
+
+        <div class="widget-desc">
+            <div class="slider-range">
+                <div data-min="10" data-max="1000" data-unit="$" class="slider-range-price ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" data-value-min="10" data-value-max="1000" data-label-result="">
+                    <div class="ui-slider-range ui-widget-header ui-corner-all"></div>
+                    <span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0"></span>
+                    <span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0"></span>
+                </div>
+                <div class="range-price">$10 - $1000</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="amado_product_area section-padding-100">
+    <div class="container-fluid">
+
+        <div class="row  ">
+            <div class="col-12 d-flex justify-content-end">
+                <div class="product-topbar d-xl-flex align-items-end justify-content-between">
+                    <!-- Total Products -->
+                    
+                    <!-- Sorting -->
+                    <div class="product-sorting  d-flex">
+                        <div class="sort-by-date d-flex align-items-center mr-15">
+                            <p>Sort by</p>
+                            <form action="#" method="get">
+                                <select name="select" id="sortBydate">
+                                    <option value="value">Newest</option>
+                                    <option value="value">Popular</option>
+                                    <option value="value">Price</option>
+                                </select>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- Single Product Area -->
+            {% for product in products %}
+            <div class="col-12 col-sm-6 col-md-12 col-xl-6">
+                <div class="single-product-wrapper ">
+                    {% with variant=product.productvariant_set.all|random %}
+                    <a href="{% url 'product_detail' product.slug %}?color={{ variant.color }}&storage={{ variant.storage }}">
+
+                    <!-- Product Image -->
+                    <div class="product-img">
+                        <img src="{{variant.displayimage.url}}" alt="">
+                        <!-- Hover Thumb -->
+                        <img class="hover-img " src="{{variant.displayimage.url}}" alt="">
+                    </div>
+
+                    <!-- Product Description -->
+                    <div class="product-description d-flex align-items-center justify-content-between">
+                        <!-- Product Meta Data -->
+                        <div class="product-meta-data">
+                            <div class="line"></div>
+                            <p class="product-price">${{variant.price}}</p>
+                                <h6>{{variant.product.name}}</h6>
+                            
+                        </div>
+                        <!-- Ratings & Cart -->
+                        <div class="ratings-cart text-right">
+                            <div class="ratings">
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                            </div>
+                            <div class="cart">
+                                <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="img/core-img/cart.png" alt=""></a>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                    {% endwith %}
+                </div>
+            </div>
+
+            {% endfor %}
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <div class="row w-100 col-12">
+              <div class="col-12">
+                
+                <nav aria-label="navigation">
+                  <ul class="pagination justify-content-center mt-50">
+                    {% if products.has_previous %}
+                      <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Prev</a></li>
+                    {% endif %}
+          
+                    
+                    <li class="page-item active"><a class="page-link" href="?page={{ products.number }}">{{ products.number }}</a></li>
+                     
+          
+                    {% if products.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">Next</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          {% endif %}
+          
+    </div>
+</div>
+</div>
+<!-- ##### Main Content Wrapper End ##### -->
+
+<!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
+<script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script>
+<!-- Popper js -->
+<script src="{% static 'js/popper.min.js' %}"></script>
+<!-- Bootstrap js -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!-- Plugins js -->
+<script src="{% static 'js/plugins.js' %}"></script>
+<!-- Active js -->
+<script src="{% static 'js/active.js' %}"></script>
+
+
+
+
+{% endblock  %}

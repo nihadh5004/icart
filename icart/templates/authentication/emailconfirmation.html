@@ -1,0 +1,10 @@
+{% autoescape off %}
+Welcome to Icart
+Hello   {{name}}
+
+Please confirm your email by clicking following link!!
+
+Confirmation Link : http://{{domain}}{% url 'activate' uidb64=uid  token=token %}
+
+
+{% endautoescape %}
