@@ -28,8 +28,8 @@
                     <div class="col-12">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mt-50">
-                                <li class="breadcrumb-item"><a href="#">Shop</a></li>
-                                <li class="breadcrumb-item"><a href="#">{{product.category}}</a></li>
+                                <li class="breadcrumb-item"><a href="/shop">Shop</a></li>
+                                <li class="breadcrumb-item"><a href="/shop?category={{product.category.id}}">{{product.category}}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">{{product.name}}</li>
                             </ol>
                         </nav>
@@ -105,7 +105,7 @@
                                 <div class="">
                                     <ul class="d-flex ">
                                         {% for storage in storages %}
-                                        <button type="button" class="btn {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
+                                        <button type="button" class="btn ml-2 {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
                                             <a href="{% url 'product_detail' product.slug %}?color={{ productvariant.color }}&storage={{ storage }}">
                                                 {{ storage }}</a>
                                         </button>
@@ -113,12 +113,12 @@
                                     </ul>
                                 </div>
 
-                                <h6 class="widget-title mb-30">Available Colors</h6>
+                                <h6 class="widget-title mb-30 mt-2">Available Colours</h6>
                         
                                 <div class="">
                                     <ul class="d-flex ">
                                         {% for color in colors %}
-                                        <button type="button" class="btn {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
+                                        <button type="button" class="btn ml-2 {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
                                             <a href="{% url 'product_detail' product.slug %}?color={{ color }}&storage={{ productvariant.storage }}">
                                                 {{ color }}</a>
                                         </button>
@@ -155,11 +155,15 @@
             <div class="d-flex">
                 {% for related_product in related_products %}
                   <div class="card ml-5" style="width: 18rem;">
-                    <img class="card-img-top" src="{{ related_product.displayimage.url }}" alt="Product Image">
+                    {% with product=related_product.productvariant_set.all|random %}
+
+                    <img class="card-img-top" src="{{ product.displayimage.url }}" alt="Product Image">
                     <div class="card-body">
-                     <a href="{% url 'product_detail' related_product.slug %}"> <h3 class="card-title text-center">{{ related_product.name }}</h3></a>
-                      <h5 class="card-title text-center">{{ related_product.price }}</h5>
+                     <a href="{% url 'product_detail' related_product.slug %}?color={{ product.color }}&storage={{ product.storage }}"> <h3 class="card-title text-center">{{ related_product.name }}</h3></a>
+                      <h5 class="card-title text-center">{{ product.price }}</h5>
                     </div>
+                    {% endwith %}
+
                   </div>
                 {% endfor %}
               </div>

@@ -1,0 +1,59 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+ 
+  
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+      <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Users</h6>
+      </div>
+      <div class="card-body">
+          <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th >ID</th>
+                    <th >Username</th>
+                    <th >Email</th>
+                    <th >Active</th>
+                    <th >Admin</th>
+                    <th >Joined Date</th>
+                    <th >Actions</th>
+                   
+                  </tr>
+                </thead>
+                 
+                <tbody>
+                  {% for user in users %}
+                  <tr>
+                    <th >{{user.id}}</th>
+                    <td>{{ user.username}}</td>
+                    {% comment %} <td>{{ user.name}}</td> {% endcomment %}
+                    <td>{{user.email}}</td>       
+                    <td>{{ user.is_active }}</td>
+                    <td>{{ user.is_superuser}}</td>
+                    <td>{{ user.date_joined}}</td>
+                    <td>
+                    {% if user.is_active %}
+                        <a class="btn btn-danger" href="{% url 'block_user' user.id %}">Block</a>
+                    {% else %}
+                        <a class="btn btn-success" href="{% url 'unblock_user' user.id %}">Unblock</a>
+                    {% endif %}
+                      
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+
+</div>
+<!-- /.container-fluid -->
+
+</div>
+{% endblock  %}

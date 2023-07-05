@@ -90,7 +90,7 @@ def place_order(request, address_id):
     productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
     total_price = productstotal['total_price']
     
-    order=Order.objects.create(user=user ,address=address, total_price=total_price, payment_status= 'ORDERED' ,payment_method = 'Cash on Delivery' )
+    order=Order.objects.create(user=user ,address=address, total_price=total_price, payment_status= 'ORDERED' ,payment_method = 'CASH_ON_DELIVERY' )
     
     cart_items=Cart.objects.filter(cart_id=cart_id)
     
@@ -99,6 +99,9 @@ def place_order(request, address_id):
                                  product=product.product, 
                                  quantity=product.quantity,
                                  price=product.price)
+        product_variant = product.product
+        product_variant.stock -= product.quantity
+        product_variant.save()
         product.delete()
         
     context={
@@ -121,7 +124,8 @@ def my_orders(request):
         
 def cancel_order(request, order_id):
     order=Order.objects.get(id=order_id)
-    order.delete()
+    order.payment_status='CANCELLED'
+    order.save()
     
     return redirect('my_orders')
     

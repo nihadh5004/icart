@@ -1,0 +1,64 @@
+{% extends 'admin/admin_base.html' %}
+
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+   
+    
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Variants</h6>
+            <a href="{%url 'add_variant'  product.id %}"><button class='btn btn-outline-success'>Add Variant</button></a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th >ID</th>
+                      <th >Image</th>
+                      <th >Product Name</th>
+                      <th >Price</th>
+                      <th > Storage</th>
+                      <th >Colour</th>
+                      <th >Stock</th>
+                      <th >Actions</th>
+                     
+                    </tr>
+                  </thead>
+                   
+                  <tbody>
+                    {% for variant in  variants %}
+                    <tr>
+                      <th >{{variant.id}}</th>
+                      <td><img src="{{ variant.displayimage.url}}" width='70' height='70' alt=""></td>
+                      <td>{{ variant.product.name}}</td>
+                      <td>{{ variant.price}}</td>
+                      <td>{{ variant.storage}}</td>
+                      <td>{{ variant.color}}</td>
+                      <td>{{ variant.stock}}</td>
+                      <td>  <a href="{% url 'edit_variant' variant.id %}">  <button class="btn btn-outline-success">edit</button></a>
+                      
+                       
+                      </td>
+                      
+                      
+                      
+                        
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  
+  </div>
+  <!-- /.container-fluid -->
+  
+  </div>
+
+{% endblock  %}

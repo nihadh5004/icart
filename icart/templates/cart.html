@@ -49,9 +49,13 @@
                                     <div class="qty-btn d-flex">
                                         <p>Qty</p>
                                         <div class="quantity">
-                                            <span class="qty-minus" onclick="var effect = document.getElementById('qty{{ product.id }}'); var qty = effect.value; if( !isNaN( qty ) &amp;&amp; qty &gt; 1 ) { effect.value--; updateQuantity({{ product.id }}, effect.value); } return false;"><i class="fa fa-minus" aria-hidden="true"></i></span>
-                                            <input type="number" class="qty-text" id="qty{{ product.id }}" step="1" min="1" max="300" name="quantity" value="{{ product.quantity }}" onchange="updateQuantity({{ product.id }}, this.value);">
-                                            <span class="qty-plus" onclick="var effect = document.getElementById('qty{{ product.id }}'); var qty = effect.value; if( !isNaN( qty )) { effect.value++; updateQuantity({{ product.id }}, effect.value); } return false;"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                            <span class="qty-minus" onclick="decrementQuantity({{ product.id }}, {{ product.quantity }});">
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </span>
+                                            <input type="number" class="qty-text" id="qty{{ product.id }}" step="1" min="1" max="{{ product.product.stock }}" name="quantity" value="{{ product.quantity }}" onchange="updateQuantity({{ product.id }}, this.value);">
+                                            <span class="qty-plus" onclick="incrementQuantity({{ product.id }}, {{ product.quantity }}, {{ product.product.stock }});">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                            </span>
                                         </div>
                                     </div>
                                 </td>
@@ -82,36 +86,52 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  function updateQuantity(productId, quantity) {
-    $.ajax({
-      type: "POST",
-      url: "/update_quantity",  // Replace with the actual URL of your Django view
-      headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Add this line to include the CSRF token
-      data: {
-          product_id: productId,
-          quantity: quantity
-        },
-        dataType: 'json',  // Expect JSON response from the server
-        success: function(response) {
-            console.log(response.price);
-            console.log(response.quantity);
-            if (response.success) {
-                // Update the displayed quantity and price
-                $("#price-" + productId).text(response.price);
-          $("#quantity-" + productId).text(response.quantity);
-          console.log("Quantity updated successfully!");
+    function updateQuantity(productId, quantity) {
+        $.ajax({
+            type: "POST",
+            url: "/update_quantity",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            data: {
+                product_id: productId,
+                quantity: quantity
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $("#price-" + productId).text(response.price);
+                    $("#quantity-" + productId).text(response.quantity);
+                    console.log("Quantity updated successfully!");
+                } else {
+                    console.log("Quantity update failed:", response.message);
+                    alert(response.message); // Display the error message to the user
+                }
+            },
+            error: function(xhr, errmsg, err) {
+                console.log("Error updating quantity:", errmsg);
+            }
+        });
+    }
+
+    function incrementQuantity(productId, quantity, stock) {
+        var effect = document.getElementById('qty' + productId);
+        var qty = parseInt(effect.value);
+        if (!isNaN(qty) && qty < stock) {
+            effect.value++;
+            updateQuantity(productId, effect.value);
         } else {
-          console.log("Quantity update failed:", response.message);
+            alert("Maximum stock limit reached."); // Display a message when maximum stock limit is reached
         }
-      },
-      error: function(xhr, errmsg, err) {
-        console.log("Error updating quantity:", errmsg);
-      }
-    });
-  }
+    }
+
+    function decrementQuantity(productId, quantity) {
+        var effect = document.getElementById('qty' + productId);
+        var qty = parseInt(effect.value);
+        if (!isNaN(qty) && qty > 1) {
+            effect.value--;
+            updateQuantity(productId, effect.value);
+        }
+    }
 </script>
-
-
 
 
 {% endblock  %}

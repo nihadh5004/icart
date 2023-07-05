@@ -1,0 +1,105 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="container-fluid my-5  d-flex  justify-content-center">
+    <div class="card card-1">
+        <div class="card-header bg-white">
+            <div class="media flex-sm-row flex-column-reverse justify-content-between  ">
+                <div class="col my-auto     text-center"> <h4 class="mb-0"> user : <span class="change-color">{{order.user}}</span> </h4> </div>
+
+            </div> 
+            <div class='mt-3 text-center'><h5>ORDER STATUS :{{order.payment_status}}</h5></div>
+        </div>
+                </div>
+        </div>
+        <div class="card-body">
+            <div class="row justify-content-between mb-3">
+                <div class="col-auto"> <h6 class="color-1 mb-0 change-color">Ordered Items</h6> </div>
+                <div class="col-auto  "> <small>Order Id : {{order.id}}</small> </div>
+            </div>
+
+            {% for item in order.orderlist_set.all %}
+            <div class="row mt-4">
+                <div class="col">
+                    <div class="card card-2">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="sq align-self-center "> <img class="img-fluid  my-auto align-self-center mr-2 mr-md-4 pl-0 p-0 m-0" src="{{item.product.displayimage.url}}" width="135" height="135" /> </div>
+                                <div class="media-body my-auto text-right">
+                                    <div class="row  my-auto flex-column flex-md-row">
+                                        <div class="col my-auto"> <h6 class="mb-0"> {{item.product.product.name}}</h6>  </div>
+                                        <div class="col my-auto"> <small>colour : {{item.product.color}}</small></div>
+                                        <div class="col my-auto"> <small>Storage : {{item.product.storage}}</small></div>
+                                        <div class="col my-auto"> <small>Qty : {{item.quantity}}</small></div>
+                                        <div class="col my-auto"><h6 class="mb-0">${{item.price}}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+           
+
+
+            <div class="row mt-4">
+                <div class="col">
+                    <div class="row justify-content-between">
+                        <div class="col-auto"><p class="mb-1 text-dark"><b>Invoice Details</b></p></div>
+                        <div class="flex-sm-col text-right col"> <p class="mb-1"><b>Total</b></p> </div>
+                        <div class="flex-sm-col col-auto"> <p class="mb-1">{{order.total_price}}</p> </div>
+                    </div>
+                   
+                    
+                    <div class="row justify-content-between">
+                        <div class="flex-sm-col text-right col"><p class="mb-1"><b>Delivery Charges</b></p></div>
+                        <div class="flex-sm-col col-auto"><p class="mb-1">Free</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row invoice ">
+                <div class="col"><p class="mb-1"> Invoice Number : {{order.id}}</p><p class="mb-1">Invoice Date : {{order.order_date}}</p></div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="jumbotron-fluid">
+                <div class="row justify-content-between ">
+                    <div class="col-auto my-auto "><h2 class="mb-0 font-weight-bold">TOTAL PAID</h2></div>
+                    <div class="col-auto my-auto ml-auto"><h3 class="display-5 ">{{order.total_price}}</h3></div>
+                </div>
+                <div class="row mb-3 mt-3 mt-md-0">
+                    <div class="col-auto border-line"> <small class="text-white">PAN:AA02hDW7E</small></div>
+                    <div class="col-auto border-line"> <small class="text-white">CIN:UMMC20PTC </small></div>
+                    <div class="col-auto "><small class="text-white">GSTN:268FD07EXX </small> </div>
+                </div>
+                <div class="row mb-3 mt-3 mt-md-0">
+                        {% if order.payment_status == 'CANCELLED' %}
+                            
+                        {% else %}
+                            <div class="col text-left">
+                                <a href="{% url 'reject_order' order.id %}">
+                                    <button class='btn btn-outline-danger px-5'>Reject Order</button>
+                                </a>
+                            </div>
+                        {% endif %}
+                        {% if order.payment_status == 'ORDERED' %}
+                        <div class="col text-right">
+                            <a href="{% url 'ship_order' order.id %}">
+                                <button class='btn btn-outline-success px-5'>Ship Order</button>
+                            </a>
+                        </div>
+                    {% endif %}
+
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock  %}

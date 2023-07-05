@@ -1,0 +1,58 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+   
+    
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Orders</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th >ID</th>
+                      <th >User</th>
+                      <th >Order Status</th>
+                      <th >Payment Method</th>
+                      <th >Order Total</th>
+                      <th >Actions</th>
+                     
+                    </tr>
+                  </thead>
+                   
+                  <tbody>
+                    {% for order in  orders %}
+                    <tr>
+                      <th >{{order.id}}</th>
+                      <th >{{order.user.username}}</th>
+                      <td>{{order.payment_status}}</td>
+                      <td>{{ order.payment_method}}</td>
+                      <td>{{ order.total_price}}</td>
+                      <td>  
+                        <a href="{%url 'order_details' order.id %}">  <button class="btn btn-outline-secondary">View Details</button></a>
+                      </td>
+                      
+                      
+                      
+                        
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  
+  </div>
+  <!-- /.container-fluid -->
+  
+  </div>
+
+
+{% endblock  %}

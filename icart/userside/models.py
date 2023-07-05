@@ -22,7 +22,8 @@ from datetime import timedelta
 class Order(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
-        ('PAID', 'Paid'),
+        ('ORDERED', 'ordered'),
+        ('SHIPPED', 'Shipped'),
         ('CANCELLED', 'Cancelled'),
         ('DELIVERED', 'Delivered'),
     ]
@@ -36,7 +37,7 @@ class Order(models.Model):
     address=models.ForeignKey(Address, on_delete=models.CASCADE)
     order_date = models.DateTimeField(default=timezone.now)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='ordered')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     delivery_date = models.DateTimeField(blank=True, null=True)
 

@@ -21,10 +21,12 @@ from django.utils import timezone
 import random
 from .models import Slider
 from productside.models import *
+from django.views.decorators.cache import cache_control
 
 # Create your views here.
 from django.db.models import F
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def home(request):
     
     sliders = Slider.objects.all()
@@ -41,8 +43,10 @@ def home(request):
     
     return render(request, 'home.html', context)
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signin(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method=='POST':
         username=request.POST['username']
         pass1=request.POST['pass1']
@@ -64,7 +68,7 @@ def signin(request):
             
             # login(request, user)
             # return redirect('home')
-            
+            messages.success(request, 'OTP has been succesfully sent to your mail')
             #rendering to the page where we can enter otp , also sending the primary key 
             return render (request,'authentication/otp_verification.html',{'user_for_otp':user.pk})
         else: 
@@ -75,6 +79,7 @@ def signin(request):
     return render(request, 'authentication/signin.html')
 
 def verify_otp(request,user_for_otp):
+    
     if request.method=='POST':
         otp=request.POST['otp']
         generated_otp=request.session.get('otp')
@@ -88,7 +93,10 @@ def verify_otp(request,user_for_otp):
             messages.error(request,'invalid otp')
             return redirect('signin')
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signup(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method=='POST':
         username=request.POST['username']
         email=request.POST['email']
@@ -152,8 +160,29 @@ def activate(request,uidb64,token):
             myuser.delete()
 
         return render(request, 'authentication/verification_failed.html')
+
 def signout(request):
     if request.user.is_authenticated:
         logout(request)
         messages.success(request,"Succesfully logged out")
         return redirect('signin')
+    
+    
+from twilio.rest import Client
+from django.conf import settings
+from django.http import HttpResponse
+
+def send_otp(phone_number):
+    # Generate the OTP
+    otp = '645736'  # Implement your OTP generation logic here
+
+    # Create a Twilio client
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    # Send the SMS with the OTP
+    message = client.messages.create(
+        body=f"Your OTP is: {otp}",
+        from_=settings.TWILIO_PHONE_NUMBER,
+        to='+919539782052'
+    )
+    return HttpResponse('OTP sent succesfully')

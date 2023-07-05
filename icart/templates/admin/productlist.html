@@ -1,0 +1,65 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+ 
+  
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+      <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Products</h6>
+          <a href="/add_product"><button class='btn btn-outline-success'>Add Product</button></a>
+      </div>
+      <div class="card-body">
+          <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th >ID</th>
+                    <th >Category Name</th>
+                    <th >Active status</th>
+                    <th >Category</th>
+                    <th >Actions</th>
+                   
+                  </tr>
+                </thead>
+                 
+                <tbody>
+                  {% for product in  products %}
+                  <tr>
+                    <th >{{product.id}}</th>
+                    <td>{{ product.name}}</td>
+                    <td>{{ product.is_active}}</td>
+                    <td>{{ product.category}}</td>
+                    <td>  <a href="{%url 'productvariantlist' product.id %}">  <button class="btn btn-outline-success">view</button></a>
+                    
+                      {% if product.is_active %}
+                        <a href="{% url 'softdelete_product' product.id %}">
+                          <button class="btn btn-outline-danger">Delete</button>
+                        </a>
+                      {% else %}
+                        <a href="{% url 'undo_softdelete_product' product.id %}">
+                          <button class="btn btn-outline-primary">Undo</button>
+                        </a>
+                      {% endif %}
+                    </td>
+                    
+                    
+                    
+                      
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+
+</div>
+<!-- /.container-fluid -->
+
+</div>
+
+{% endblock  %}

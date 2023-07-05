@@ -1,0 +1,54 @@
+{% extends 'admin/admin_base.html' %}
+
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+   
+    
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Categories</h6>
+            <a href="/create_category"><button class='btn btn-outline-success'>Add Category</button></a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Category Name</th>
+                        <th scope="col">Product Count</th>
+                        <th scope="col">Actions</th>
+                       
+                      </tr>
+                  </thead>
+                   
+                  <tbody>
+                    {% for category in  product_counts %}
+                    <tr>
+                      <th >{{category.id}}</th>
+                      <td>{{ category.category_name}}</td>
+                      <td>{{ category.product_count}}</td>
+                      
+                      {% comment %} <td>{{ user.name}}</td> {% endcomment %}
+                      
+                      <td>
+                        
+                        
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  
+  </div>
+  <!-- /.container-fluid -->
+  
+  </div>
+
+{% endblock  %}
