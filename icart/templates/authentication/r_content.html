@@ -1,0 +1,10 @@
+{% autoescape off %}
+Welcome to Icart
+Hello   {{name}}
+
+Please reset your password by clicking following link!!
+
+Confirmation Link : http://{{domain}}{% url 'res_pass' uidb64=uid  token=token %}
+
+
+{% endautoescape %}

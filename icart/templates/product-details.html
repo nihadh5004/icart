@@ -57,7 +57,7 @@
                                         </a>
                                     </div>
                                     {% for product in productvariant.productimage_set.all %}
-                                    <div class="carousel-item">
+                                    <div class="carousel-item ">
                                         <a class="gallery_img" href="{{product.image.url}}">
                                             <img class="d-block img_size zoom" src="{{product.image.url}}" alt="First slide" id="zoom"  data-magnify-src="{{ product.image.url }}" data-zoom-image="{{ product.image.url }} "  >
                                             
@@ -189,14 +189,9 @@
           });
       </script>
       
- <!--### for zoom like amazon websie #### -->
-    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js" ></script>
-    <script>
-        $("#zoom").elevateZoom({
-            zoomWindowPosition: 1 
-        });
 
-    </script> {% endcomment %}
+      
+ 
     
     <!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
     {% comment %} <script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script> {% endcomment %}

@@ -6,7 +6,7 @@ from productside.models import *
 
 class UserCart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
+    coupon=models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     def __str__(self):
         return f'{self.id} - {self.user.username}'
 

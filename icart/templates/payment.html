@@ -1,5 +1,9 @@
 {% extends 'base1.html' %}
+{% block links %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+{% endblock  %}
 
 {% block content %}
 <div class="cart-table-area section-padding-100">
@@ -49,18 +53,22 @@
                    
                     <div class="payment-method mt-3">
                         <!-- Cash on delivery -->
-                        <div class="custom-control custom-checkbox mr-sm-2">
-                            <input type="checkbox" class="custom-control-input payment-checkbox" id="cod" checked>
+                        <div class="custom-control custom-radio mr-sm-2">
+                            <input type="radio" class="custom-control-input payment-radio" id="cod" name="paymentMethod" value="COD">
                             <label class="custom-control-label" for="cod">Cash on Delivery</label>
                         </div>
                         <!-- Paypal -->
-                        <div class="custom-control custom-checkbox mr-sm-2">
-                            <input type="checkbox" class="custom-control-input payment-checkbox" id="paypal">
-                            <label class="custom-control-label" for="paypal">Paypal <img class="ml-15" src="img/core-img/paypal.png" alt=""></label>
+                        <div class="custom-control custom-radio mr-sm-2">
+                            <input type="radio" class="custom-control-input payment-radio" id="paypal" name="paymentMethod" value='PREPAID'>
+                            <label class="custom-control-label" for="paypal">Prepaid </label>
                         </div>
                     </div>
+                    
                     <div class="cart-btn mt-100">
-                      <a href="{% url 'place_order' address.id %}"><button type="button" class="btn amado-btn w-100" id="proceed-payment-btn">Place Order</button></a>
+                        <div id="selected-payment-method"></div>
+
+                         {% comment %} <button onclick="updatePaymentMethod()">Update Payment Method</button> {% endcomment %}
+                      <button onclick="updatePaymentMethod()" type="button" class="btn amado-btn w-100" id="proceed-payment-btn">Place Order</button>
                     </div>
                 </div>
             </div>
@@ -71,7 +79,10 @@
                         <ul class="summary-table">
                             <li><span>subtotal:</span> <span>${{total_price}}</span></li>
                             <li><span>delivery:</span> <span>Free</span></li>
-                            <li><span class='font-weight-bold'>total:</span> <span>${{total_price}}</span></li>
+                            {% if cart_id.coupon  %}
+                            <li><span class='font-weight-bold'>Coupon</span> <a href="{% url 'delete_coupon' cart_id.id %}"><span>{{cart_id.coupon}}</span></li></a>
+                            {% endif %}
+                            <li><span class='font-weight-bold'>total:</span> <span>${{discount_price}}</span></li>
                         </ul>
                        
                     </div>
@@ -82,7 +93,98 @@
         </div>
     </div>
 </div>
-</div>      
+</div>    
 
+
+
+<script>
+// AJAX function to send selected payment method and display it
+function updatePaymentMethod() {
+    var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    if (paymentMethod === "PREPAID") {
+        var total_price = "{{ discount_price}}"
+        ;  // Get the total_price value from Django template
+
+        redirectToRazorpay(paymentMethod, total_price);
+    } else {
+        var total_price = "{{ discount_price}}"
+        sendPaymentMethodToServer(paymentMethod,total_price);
+    }
+}
+
+function sendPaymentMethodToServer(paymentMethod,total_price) {
+    $.ajax({
+        url: "/place_order/{{address.id}}",
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        data: { paymentMethod: paymentMethod, total_price: total_price },
+        success: function(response) {
+            window.location.href = "/order_confirmation/" + response.order_id;
+        },
+        error: function(xhr, status, error) {
+            console.log("Error:", error);
+        }
+    });
+    
+}
+
+function redirectToRazorpay(paymentMethod, total_price ) {
+    $.ajax({
+        url: "/initiate_payment",
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        data: { paymentMethod: paymentMethod, total_price: total_price },
+        success: function(response) {
+    var options = {
+        "key": "rzp_test_ikAdm3eepXtSKT", // Enter the Key ID generated from the Dashboard
+        "amount": response.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": response.currency,
+        "name": "iCart",
+        "description" : "Test Transaction",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Apple-logo.png/480px-Apple-logo.png",
+        "order_id": response.razorpay_order_id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+        "handler": function (response){
+            alert(response.razorpay_payment_id);
+            $.ajax({
+                url: "/place_order/{{address.id}}",
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                data: { paymentMethod: paymentMethod , payment_id : response.razorpay_payment_id ,total_price: total_price},
+                success: function(response) {
+                    window.location.href = "/order_confirmation/" + response.order_id;
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error:", error);
+                }
+            });
+
+
+        },
+        "prefill": {
+            "name": "",
+            "email": "",
+            "contact": ""
+        },
+        "notes": {
+            "address": "Razorpay Corporate Office"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert(response.error.reason);
+        alert(response.error.metadata.payment_id);
+});
+    rzp1.open();
+    // Perform the redirect to the PayPal function or page here
+
+},
+});
+}
+
+</script>
 
 {% endblock  %}

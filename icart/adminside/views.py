@@ -5,19 +5,95 @@ from django.contrib.auth.models import User
 from userside.models import *
 from django.db.models import Count
 from django.views.decorators.cache import cache_control
+from datetime import date
+from django.db.models import Sum, Count
 
 # from productside.forms import ProductForm
 
 # Create your views here.
+from datetime import datetime, timedelta
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
+
+
 def _admin_dashboard(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            return render (request, 'admin/dashboard.html')
+            start_date = request.GET.get('start_date')  # Get the start date from the query parameters
+            end_date = request.GET.get('end_date')  # Get the end date from the query parameters
+
+            if not start_date and not end_date:
+                # Set both start_date and end_date to the current date
+                start_date = end_date = date.today().isoformat()
+            elif not start_date:
+                # Set start_date to end_date
+                start_date = end_date
+            elif not end_date:
+                # Set end_date to start_date
+                end_date = start_date
+
+            # Filter orders based on the provided dates
+            order_counts = Order.objects.filter(order_date__date__range=[start_date, end_date]).exclude(payment_status='CANCELLED')\
+                .values('order_date__date') \
+                .annotate(order_count=Count('id'), total_price_sum=Sum('total_price')) \
+                .order_by('order_date__date')
+                
+            delivered_orders = Order.objects.filter(
+                    order_date__date__range=[start_date, end_date],
+                    payment_status='DELIVERED'
+                ).values('order_date__date').annotate(
+                    order_count=Count('id'),
+                    total_price_sum=Sum('total_price')
+                ).order_by('order_date__date')
+
+            total_deliveries=delivered_orders.aggregate(total_deliveries=Sum('order_count'))['total_deliveries']
+            
+            
+            ordered_orders = Order.objects.filter(
+                    order_date__date__range=[start_date, end_date],
+                    payment_status='ORDERED'
+                ).values('order_date__date').annotate(
+                    order_count=Count('id'),
+                    total_price_sum=Sum('total_price')
+                ).order_by('order_date__date')
+
+            total_pending=ordered_orders.aggregate(total_pending=Sum('order_count'))['total_pending']
+
+
+
+
+            top_products = Orderlist.objects.filter(order_id__order_date__date__range=[start_date, end_date]) \
+                .values('product__product__name') \
+                .annotate(total_sales=Sum('quantity')) \
+                .order_by('-total_sales')[:5]
+                
+            total_price_sum = order_counts.aggregate(total_price_sum=Sum('total_price'))['total_price_sum']
+            total_orders = order_counts.aggregate(total_orders=Sum('order_count'))['total_orders']
+
+            recent_orders=Order.objects.all().order_by('-id')[:5]
+            
+            categories = Categories.objects.annotate(product_count=Count('product'))
+
+            context = {
+                'order_counts': order_counts,
+                'total_price_sum': total_price_sum,
+                'total_orders': total_orders,
+                'top_products' : top_products,
+                'total_deliveries' : total_deliveries ,
+                'total_pending' : total_pending ,
+                'recent_orders' : recent_orders ,
+                'categories' : categories ,
+                'start_date' : start_date ,
+                'end_date' : end_date ,
+            }
+
+            return render(request, 'admin/dashboard.html', context)
         else:
             return redirect('_admin_signin')
     else:
-        return redirect ('_admin_signin')
+        return redirect('_admin_signin')
+
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def _admin_signin(request):
@@ -173,7 +249,7 @@ def undo_softdelete_product(request, product_id):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def orderlist(request):
-    orders=Order.objects.all()
+    orders=Order.objects.all().order_by('-id')
     
     context={
         'orders' : orders

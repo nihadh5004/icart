@@ -186,3 +186,70 @@ def send_otp(phone_number):
         to='+919539782052'
     )
     return HttpResponse('OTP sent succesfully')
+
+
+
+
+from django.http import HttpResponseRedirect
+
+
+def reset_password(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        
+        try:
+            user = User.objects.get(email=email)
+            # User with the entered email exists
+            # Proceed with sending the email confirmation
+
+            current_site = get_current_site(request)
+            r_subject = 'Reset Password @ iCart'
+            message3 = render_to_string('authentication/reset_content.html', {
+                'name': user.username,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': generate_token.make_token(user),
+            })
+            email = EmailMessage(
+                r_subject, message3,
+                settings.EMAIL_HOST_USER,
+                [user.email]
+            )
+            email.fail_silently = True
+            email.send()
+
+            messages.success(request, 'The link to reset password has sent to your mail')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        except User.DoesNotExist:
+            # User with the entered email does not exist
+            messages.error(request, 'User does not exist')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return render(request, 'authentication/reset_password.html')
+
+
+def res_pass(request,uidb64,token):
+    try:
+        uid=force_str(urlsafe_base64_decode(uidb64))
+        myuser=User.objects.get(pk=uid)
+    except(TypeError,ValueError,OverflowError, User.DoesNotExist):
+        myuser=None
+    # checking the user and token doesnt has a conflict  
+    if myuser is not None and generate_token.check_token(myuser,token):
+        return render(request,'authentication/new_password.html' ,{'user': myuser})
+        
+def update_password(request, user_id):
+    if request.method =='POST':
+        pass1=request.POST['pass1']
+        pass2=request.POST['pass2']
+        if pass1 == pass2 :
+            user=User.objects.get(id=user_id)
+            user.set_password(pass1)
+            user.save()
+        
+            messages.success(request, 'Password Updated Succesfully')
+            return redirect('signin')
+        else:
+            messages.error(request,'Passwords didnt match, Please enter both passwords Correctly')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+  

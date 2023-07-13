@@ -32,18 +32,72 @@
           <td>{{ order.total_price}}</td>
           <td>{{ order.payment_status}}</td>
           <td>{{ order.payment_method}}</td>
-          <td> <a href="{% url 'cancel_order' order.id %}">  <button class="btn btn-outline-secondary">View Details</button></a>
-          <a href="{% url 'cancel_order' order.id %}">  <button class="btn btn-outline-danger">Cancel Order</button></a>
-          </td>
-         
-         
-          
+          <td> <a href="{% url 'user_order_detail' order.id %}">  <button class="btn btn-outline-secondary">View Details</button></a>
+            {% if order.payment_status == 'SHIPPED' %} 
             
+            {% elif order.payment_status == 'CANCELLED' %} 
+               
+            {% else %}
+            {% if order.payment_method == 'PREPAID' %}
+            <a href="#" onclick="initiateRefundAndCancelOrder('{{ order.id }}')">  
+              <button class="btn btn-outline-danger">Cancel Order</button>
+            </a>
+            {% else %}
+            <a href="#"  onclick="cancelOrder('{{ order.id }}')" >  
+              <button class="btn btn-outline-danger">Cancel Order</button>
+            </a>
+            {% endif %}         
+          {% endif %}
+          </td>
+        
         </tr>
         {% endfor %}
       </tbody>
     </table>
     </div>
+<script>
+  function initiateRefundAndCancelOrder(orderId) {
+    // AJAX call to initiate refund
+    $.ajax({
+      url: '/initiate_refund',
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      data: { order_id: orderId },
+      success: function(response) {
+        alert('Refund inititated, will be back in 2-7 days')
+        cancelOrder(orderId);
+      },
+      error: function(xhr, status, error) {
+        console.log('Refund error:', error);
+        // Handle the refund error if needed
+      }
+    });
+  }
+  
+  function cancelOrder(orderId) {
+    // AJAX call to cancel the order
+    $.ajax({
+      url: '/_cancel_order' ,
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      data: { order_id: orderId },
+      success: function(response) {
+        alert('Order has been succesfully cancelled')
+        location.reload();
+        // Order canceled successfully
+        // Handle any additional actions or update the UI as needed
+      },
+      error: function(xhr, status, error) {
+        console.log('Cancel order error:', error);
+        // Handle the cancel order error if needed
+      }
+    });
+  }
+  
+</script>
+
+
+
 <!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
 <script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script>
 <!-- Popper js -->

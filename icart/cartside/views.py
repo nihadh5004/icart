@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import *
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from decimal import Decimal
 from django.db.models import Sum
 from django.contrib import messages
@@ -29,8 +29,9 @@ def addcart(request, slug):
             else:
                 # Product does not exist in the cart, create a new cart item
                 Cart.objects.create(cart_id=cart, product=productvariant, quantity=quantity, price=totalprice)
+            messages.success(request, 'Item Added to Cart')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    return redirect('shop')
     
     
     
@@ -40,15 +41,58 @@ def cart(request):
     products=Cart.objects.filter(cart_id=cart_id)
     productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
     total_price = productstotal['total_price']
+    if not products:
+        cart_id.coupon =None
+        cart_id.save()
+        return redirect('shop')
+    
+    
+    if request.method=='POST':
+        coupon=request.POST['coupon']
+        coupon_obj=Coupon.objects.filter(coupon_code=coupon)
+        if not coupon_obj:
+            messages.error(request, 'Invalid Coupon')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        if cart_id.coupon:
+            messages.error(request , 'Coupon already exists')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        if total_price < coupon_obj[0].minimum_amount :
+            messages.error(request, f'Amount should be greater than  {coupon_obj[0].minimum_amount}.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
+        
+        cart_id.coupon=coupon_obj[0]
+        cart_id.save()
+        messages.success(request, 'Coupon applied succesfully')
 
-    
-    
+    if cart_id.coupon:
+        if cart_id.coupon.minimum_amount > total_price:
+            messages.error(request, f'Amount should be greater than  {cart_id.coupon.minimum_amount}.')
+            cart_id.coupon=None
+            cart_id.save()
+    if cart_id.coupon:    
+        discount_price= total_price - cart_id.coupon.discount_price
+    else:
+        discount_price = total_price
     context={
+        'cart_id' : cart_id ,
         'products': products,
-        'total_price': total_price
+        'total_price': total_price ,
+        'discount_price' : discount_price
+        
     }
     
     return render (request, 'cart.html', context)
+
+
+def delete_coupon(request, cart_id):    
+    cart=UserCart.objects.get(id=cart_id)
+    cart.coupon = None
+    cart.save()
+    messages.error(request , 'Coupon removed')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
 
 import json
 from django.http import JsonResponse

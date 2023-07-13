@@ -29,8 +29,8 @@ class Order(models.Model):
     ]
 
     PAYMENT_METHOD_CHOICES = [
-        ('PAYPAL', 'PayPal'),
-        ('CASH_ON_DELIVERY', 'Cash on Delivery'),
+        ('PREPAID', 'Prepaid'),
+        ('COD', 'Cash on Delivery'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -39,6 +39,7 @@ class Order(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='ordered')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    payment_id = models.CharField(max_length=50, null=True,blank=True)
     delivery_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
