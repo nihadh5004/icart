@@ -8,7 +8,20 @@
                 <div class="col my-auto     text-center"> <h4 class="mb-0"> user : <span class="change-color">{{order.user}}</span> </h4> </div>
 
             </div> 
-            <div class='mt-3 text-center'><h5>ORDER STATUS :{{order.payment_status}}</h5></div>
+            <div class="mt-3 text-center">
+                <h5>ORDER STATUS:</h5>
+                <div class="form-group">
+                  <select id="paymentStatusDropdown" class="form-control">
+                    <option value="ORDERED" {% if order.payment_status == 'ORDERED' %}selected{% endif %}>ORDERED</option>
+                    <option value="SHIPPED" {% if order.payment_status == 'SHIPPED' %}selected{% endif %}>SHIPPED</option>
+                    <option value="DELIVERED" {% if order.payment_status == 'DELIVERED' %}selected{% endif %}>DELIVERED</option>
+                    <option value="RETURNED" {% if order.payment_status == 'RETURNED' %}selected{% endif %}>RETURNED</option>
+                    <option value="CANCELLED" {% if order.payment_status == 'CANCELLED' %}selected{% endif %}>CANCELLED</option>
+                  </select>
+                </div>
+              </div>
+              
+              
         </div>
                 </div>
         </div>
@@ -79,11 +92,15 @@
                         {% if order.payment_status == 'CANCELLED' %}
                             
                         {% else %}
-                            <div class="col text-left">
-                                <a href="{% url 'reject_order' order.id %}">
-                                    <button class='btn btn-outline-danger px-5'>Reject Order</button>
-                                </a>
-                            </div>
+                            {% if order.payment_method == 'PREPAID' %}
+                            <a href="#" onclick="initiateRefundAndCancelOrder('{{ order.id }}')">  
+                            <button class="btn btn-outline-danger">Cancel Order</button>
+                            </a>
+                            {% else %}
+                            <a href="#"  onclick="cancelOrder('{{ order.id }}')" >  
+                            <button class="btn btn-outline-danger">Cancel Order</button>
+                            </a>
+                            {% endif %}
                         {% endif %}
                         {% if order.payment_status == 'ORDERED' %}
                         <div class="col text-right">
@@ -99,7 +116,46 @@
         </div>
     </div>
 </div>
-
+<script>
+    function initiateRefundAndCancelOrder(orderId) {
+      // AJAX call to initiate refund
+      $.ajax({
+        url: '/initiate_refund',
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: { order_id: orderId },
+        success: function(response) {
+          alert('Refund inititated, will be back in 2-7 days')
+          cancelOrder(orderId);
+        },
+        error: function(xhr, status, error) {
+          console.log('Refund error:', error);
+          // Handle the refund error if needed
+        }
+      });
+    }
+    
+    function cancelOrder(orderId) {
+      // AJAX call to cancel the order
+      $.ajax({
+        url: '/_cancel_order' ,
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: { order_id: orderId },
+        success: function(response) {
+          alert('Order has been succesfully cancelled')
+          location.reload();
+          // Order canceled successfully
+          // Handle any additional actions or update the UI as needed
+        },
+        error: function(xhr, status, error) {
+          console.log('Cancel order error:', error);
+          // Handle the cancel order error if needed
+        }
+      });
+    }
+    
+  </script>
 
 
 {% endblock  %}

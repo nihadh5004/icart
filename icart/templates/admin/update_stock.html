@@ -82,10 +82,22 @@
                               <input type="number" id="contactBlockEmail2" class="form-control" name="price" value={{variant.price}} > 
                           </div>
                         </div>
+                        <div class="col-md-6">
+                          <div class="form-outline mb-4 text-left">
+                              <label class="form-label" for="contactBlockEmail2">Discount (%) </label>
+                              <input type="number" id="contactBlockEmail2" class="form-control" name="discount" value={{variant.discount}} > 
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-outline mb-4 text-left">
+                              <label class="form-label" for="contactBlockEmail2">Discount Price</label>
+                              <input type="number" id="contactBlockEmail2" class="form-control" name="" value={{variant.discount_price}} > 
+                          </div>
+                        </div>
                         <div class="col-md-12 text-left">
                           <div class="form-outline mb-4">
                               <label class="form-label" for="contactBlockImage">Display Image</label>
-                              <input type="file" id="contactBlockImage" class="form-control" name="display_image" >
+                              <input type="file" id="contactBlockImage" class="form-control" name="display_image" value="{{variant.displayimage.url}}" >
                           </div>
                       </div>
                   

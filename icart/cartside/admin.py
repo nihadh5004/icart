@@ -4,3 +4,4 @@ from .models import *
 
 admin.site.register(UserCart)
 admin.site.register(Cart)
+admin.site.register(Wallet)

@@ -26,6 +26,7 @@ class Order(models.Model):
         ('SHIPPED', 'Shipped'),
         ('CANCELLED', 'Cancelled'),
         ('DELIVERED', 'Delivered'),
+        ('RETURNED', 'Returned'),
     ]
 
     PAYMENT_METHOD_CHOICES = [

@@ -105,7 +105,7 @@ def place_order(request, address_id):
         total_price=request.POST.get('total_price')
         user=request.user
         cart_id=UserCart.objects.get(user=user)
-        productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price')) 
+        # productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price')) 
         # total_price = productstotal['total_price']
         # if cart_id.coupon:
         #     total_price = productstotal['total_price'] - cart_id.coupon.discount_price
@@ -266,7 +266,14 @@ def profile_details(request):
         state = request.POST['state']
 
         # Update user profile
-        
+        if not username   :
+            messages.error(request , "Username Cant be blank")
+            return redirect('profile_details')
+        if not email   :
+            messages.error(request , "Email Cant be blank")
+            return redirect('profile_details')
+        if email !=user.email:
+            messages.success(request,'OTP Send to your mail')
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
@@ -358,3 +365,49 @@ def initiate_refund(request):
     except Exception as e:
         # Handle any exceptions that occur during the refund process
         return JsonResponse({'error': str(e)}, status=500)
+    
+    
+def return_order(request):
+    try:
+        order_id = request.POST.get('order_id')
+        order = Order.objects.get(id=order_id)
+        order.payment_status = 'RETURNED'
+        order.save()
+
+        ordered_items = Orderlist.objects.filter(order_id=order)
+        for product in ordered_items:
+            product_variant = product.product
+            product_variant.stock += product.quantity
+            product_variant.save()
+            
+        user=order.user
+        user=User.objects.get(id=user.id)
+        print(user.username)
+        wallet=Wallet.objects.get(user=user)
+        print(wallet.user.username)
+        print(wallet.money)
+        if wallet.money==None:
+            wallet.money= order.total_price
+        else:
+            wallet.money = wallet.money + order.total_price
+        print(wallet.money)
+
+        wallet.save()
+        
+        return JsonResponse({'status': 'success'})
+    except Order.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Order not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    
+    
+def wallet(request):
+    user=request.user
+    wallet=Wallet.objects.get(user=user)
+    
+    context={
+        "wallet" : wallet 
+    }
+    
+    return render(request, 'wallet.html' , context)

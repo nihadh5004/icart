@@ -1,0 +1,35 @@
+{% extends 'profile_base.html' %}
+
+{% block content %}
+<!-- Card -->
+<div class='ml-5 py-5 col-8'>
+
+
+ <div class="card">
+
+    <!-- Card image -->
+    {% comment %} <img class="card-img-top" src="https://mdbootstrap.com/img/Photos/Others/images/43.webp" alt="Card image cap"> {% endcomment %}
+  
+    <!-- Card content -->
+    <div class="card-body">
+  
+      <!-- Title -->
+      <div class='bg-secondary  col-12'>
+
+          <h1 class='py-4 '>Wallet</h1>
+      </div>
+      {% if not wallet.money %}
+      <h3 class='text-center py-5'>Wallet amount : 0</h3>
+
+      {% else %}
+      <h3 class='text-center py-5'>Wallet amount : {{wallet.money}}</h3>
+      {% endif %}
+      <!-- Button -->
+  
+    </div>
+  
+  </div>
+  <!-- Card -->
+</div>
+
+{% endblock  %}

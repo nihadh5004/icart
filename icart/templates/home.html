@@ -11,11 +11,14 @@
   <div class="carousel-inner">
     {% for item in sliders %}
     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-      <img src="{{ item.Image }}" alt="{{ item.name }}" class="d-block w-100">
+      <img src="{{ item.Image }}" alt="{{ item.Product.name }}" class="d-block w-100">
       <div class="carousel-caption ">
           <p class='text-left ' style='font-family:Century Gothic; '>{{ item.Discount_deals }}</p>
-        <h3 class='text-left  font-weight-bold'>{{ item.Product_name }}</h3>
-        <h1 class='text-left'>Discount sale of {{ item.Sale }}%</h1>
+        <h3 class='text-left text-white  font-weight-bold'>{{ item.Product.product.name }}</h3>
+        <h1 class='text-left text-white'>Discount sale of {{ item.Product.discount }}%</h1>
+        <a href="{% url 'product_detail' item.Product.product.slug %}?color={{ item.Product.color }}&storage={{ item.Product.storage }}"><h5 class='text-left text-secondary'>Shop Now</h5></a>
+        
+
       </div>
     </div>
     {% endfor %}

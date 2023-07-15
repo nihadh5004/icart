@@ -51,6 +51,8 @@ class ProductVariant(models.Model):
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True,blank=True)
+    discount = models.IntegerField( null=True,blank=True)
     stock = models.PositiveIntegerField(default=0)
     displayimage= models.ImageField(upload_to='product_images')
     slug = models.SlugField(blank=True, unique=True)

@@ -9,6 +9,7 @@ urlpatterns = [
   path('place_order/<int:address_id>', views.place_order , name='place_order'),
   path('my_orders', views.my_orders , name='my_orders'),
   path('_cancel_order', views.cancel_order , name='cancel_order'),
+  path('return_order', views.return_order , name='return_order'),
   path('profile_details', views.profile_details , name='profile_details'),
   path('address', views.address, name='address'),
   path('profile_add_address', views.profile_add_address, name='profile_add_address'),
@@ -17,4 +18,5 @@ urlpatterns = [
   path('initiate_payment', views.initiate_payment, name='initiate_payment'),
   path('initiate_refund', views.initiate_refund, name='initiate_refund'),
   path('change_password/<int:user_id>', views.change_password , name='change_password'),
+  path('wallet' ,views.wallet, name='wallet'),
 ]

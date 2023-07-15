@@ -13,6 +13,9 @@ def addcart(request, slug):
         user = request.user
         price = Decimal(productvariant.price)
         totalprice = price * Decimal(quantity)
+        if productvariant.discount_price:
+            totalprice = productvariant.discount_price * Decimal(quantity)
+        
         cart = UserCart.objects.get(user=user)
         
         if quantity > productvariant.stock:
@@ -44,6 +47,7 @@ def cart(request):
     if not products:
         cart_id.coupon =None
         cart_id.save()
+        messages.error(request, 'The cart is empty, Please add something to the cart')
         return redirect('shop')
     
     
@@ -111,6 +115,8 @@ def update_quantity(request):
         else:
             product.quantity = quantity
             product.price = product.product.price * Decimal(product.quantity)
+            if product.product.discount_price:
+                product.price = product.product.discount_price * Decimal(product.quantity)
             product.save()
             
             # Prepare the success response data

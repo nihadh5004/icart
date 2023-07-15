@@ -14,6 +14,9 @@
        
         z-index: 9999 ;
     }
+    .discount {
+        text-decoration: line-through;
+    }
 </style>
 {% endblock %}
 
@@ -74,9 +77,21 @@
                             <!-- Product Meta Data -->
                             <div class="product-meta-data">
                                 <div class="line"></div>
-                                <p class="product-price">${{productvariant.price}}</p>
+                              {% if productvariant.discount_price %}
+                                <p class="product-price discount">
+                                  <span class="product-price">${{ productvariant.price }}</span>
+                                </p>
+                                <p class="product-price ">
+                                    <span class="product-price">${{ productvariant.discount_price }}</span>
+                                </p>
+                              {% else %}
+                                <p class="product-price">
+                                  ${{ productvariant.price }}
+                                </p>
+                              {% endif %}
+                              
                                 <a href="product-details.html">
-                                    <h6>{{product.name}}({{productvariant.color}},{{productvariant.storage}})</h6>
+                                    <h6 class="text-uppercase">{{product.name}}({{productvariant.color}},{{productvariant.storage}})</h6>
                                 </a>
                                 <!-- Ratings & Review -->
                                 <div class="ratings-review mb-15 d-flex align-items-center justify-content-between">

@@ -14,6 +14,18 @@ class UserCart(models.Model):
 def create_user_cart(sender, instance, created, **kwargs):
     if created:
         UserCart.objects.create(user=instance)
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    money=models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    def __str__(self):
+        return f'{self.id} - {self.user.username}'
+
+@receiver(post_save, sender=User)
+def create_user_cart(sender, instance, created, **kwargs):
+    if created:
+        Wallet.objects.create(user=instance)
         
         
         

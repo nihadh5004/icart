@@ -33,21 +33,7 @@
           <td>{{ order.payment_status}}</td>
           <td>{{ order.payment_method}}</td>
           <td> <a href="{% url 'user_order_detail' order.id %}">  <button class="btn btn-outline-secondary">View Details</button></a>
-            {% if order.payment_status == 'SHIPPED' %} 
-            
-            {% elif order.payment_status == 'CANCELLED' %} 
-               
-            {% else %}
-            {% if order.payment_method == 'PREPAID' %}
-            <a href="#" onclick="initiateRefundAndCancelOrder('{{ order.id }}')">  
-              <button class="btn btn-outline-danger">Cancel Order</button>
-            </a>
-            {% else %}
-            <a href="#"  onclick="cancelOrder('{{ order.id }}')" >  
-              <button class="btn btn-outline-danger">Cancel Order</button>
-            </a>
-            {% endif %}         
-          {% endif %}
+                   
           </td>
         
         </tr>
