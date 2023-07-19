@@ -54,6 +54,7 @@
                 <div class="range-price">$10 - $1000</div>
             </div>
         </div>
+        <a href="?max_price=500.00"><button>300</button></a>
     </div>
 </div>
 
@@ -88,25 +89,24 @@
             <!-- Single Product Area -->
             {% for product in products %}
             <div class="col-12 col-sm-6 col-md-12 col-xl-6">
-                <div class="single-product-wrapper ">
-                    {% with variant=product.productvariant_set.all|random %}
-                    <a href="{% url 'product_detail' product.slug %}?color={{ variant.color }}&storage={{ variant.storage }}">
-
-                    <!-- Product Image -->
-                    <div class="product-img">
-                        <img src="{{variant.displayimage.url}}" alt="">
-                        <!-- Hover Thumb -->
-                        <img class="hover-img " src="{{variant.displayimage.url}}" alt="">
-                    </div>
-
+                <div class="single-product-wrapper">
+                    {% if product.selected_variant %}
+                    <a href="{% url 'product_detail' product.slug %}?color={{ product.selected_variant.color }}&storage={{ product.selected_variant.storage }}">
+                        <!-- Product Image -->
+                        <div class="product-img">
+                            <img src="{{ product.selected_variant.displayimage.url }}" alt="">
+                            <!-- Hover Thumb -->
+                            <img class="hover-img" src="{{ product.selected_variant.displayimage.url }}" alt="">
+                        </div>
+                    </a>
+                    {% endif %}
                     <!-- Product Description -->
                     <div class="product-description d-flex align-items-center justify-content-between">
                         <!-- Product Meta Data -->
                         <div class="product-meta-data">
                             <div class="line"></div>
-                            <p class="product-price">${{variant.price}}</p>
-                                <h6>{{variant.product.name}}</h6>
-                            
+                            <p class="product-price">${{ product.selected_variant.price }}</p>
+                            <h6>{{ product.name }}</h6>
                         </div>
                         <!-- Ratings & Cart -->
                         <div class="ratings-cart text-right">
@@ -122,8 +122,6 @@
                             </div>
                         </div>
                     </div>
-                </a>
-                    {% endwith %}
                 </div>
             </div>
 
@@ -170,7 +168,36 @@
 <!-- Active js -->
 <script src="{% static 'js/active.js' %}"></script>
 
+<script>
+    $(document).ready(function() {
+        $('.wishlist-icon').on('click', function() {
+          var variantSlug = $(this).data('slug');
+          var heartIcon = $(this);
+          heartIcon.removeClass('fa-heart-o').addClass('fa-heart');
+          add_wishlist(variantSlug);
+        });
+      });
+    function add_wishlist(variantSlug) {
 
+         $.ajax({
+           url: "{% url 'addwishlist' %}",
+           method: "POST",
+           headers: { "X-CSRFToken": "{{ csrf_token }}" },
+           data: { slug: variantSlug  },
+           success: function(response) {
+
+             alert("item added")
+             
+
+             
+           },
+           error: function(xhr, status, error) {
+             console.log("Failed to add:", error);
+           }
+         });
+    }
+    
+</script>
 
 
 {% endblock  %}

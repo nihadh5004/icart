@@ -1,68 +1,98 @@
 {% extends 'profile_base.html' %}
 {% load static %}
-{% block content %}
-<div class="container rounded bg-white col-md-8 col-sm-12 mt-5 mb-5"> 
-    <div class="row"> 
-        <div class="col-md-6 border-right"> 
-            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                <img class="rounded-circle mt-5 " src="https://www.pngall.com/wp-content/uploads/5/Profile-PNG-Photo.png" width='500px' height='500px' alt=''>
-                
-                <h4 class="font-weight-bold text-uppercase">{{ request.user }}</h4>
-                <span class="text-black-50">{{ user.email }}</span>
-                <span> </span>
-            </div> 
-        </div> 
-        <div class="col-md-6 border-right"> 
-            <form method="post" action="{% url 'profile_details' %}">
-                {% csrf_token %}
-                <div class="p-3 py-5">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="text-right">Profile Settings</h4>
-                    </div> 
-                    <div class="row mt-2"> 
-                        <div class="col-md-12">
-                            <label class="labels">Username</label>
-                            <input type="text" class="form-control" placeholder="enter username" name="username" value="{{ user.username }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="labels">Name</label>
-                            <input type="text" class="form-control" placeholder="first name" name="first_name" value="{{ user.first_name }}">
-                        </div> 
-                        <div class="col-md-6">
-                            <label class="labels">Surname</label>
-                            <input type="text" class="form-control" placeholder="surname" name="last_name" value="{{ user.last_name }}">
-                        </div>
-                    </div> 
-                    <div class="row mt-3"> 
-                        <div class="col-md-12">
-                            <label class="labels">PhoneNumber</label>
-                            <input type="text" class="form-control" placeholder="enter phone number" name="phone" value="{{ user.phone }}">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="labels">Email ID</label>
-                            <input type="text" class="form-control" placeholder="enter email id" name="email" value="{{ user.email }}">
-                        </div>
-                    </div> 
-                    <div class="row mt-3"> 
-                        <div class="col-md-6">
-                            <label class="labels">Country</label>
-                            <input type="text" class="form-control" placeholder="country" name="country" value="">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="labels">State/Region</label>
-                            <input type="text" class="form-control" placeholder="state" name="state" value="">
-                        </div> 
-                    </div> 
-                    <a href="{%url 'change_password' user.id %}"><button class="btn btn-outline-danger profile-button mt-4" type="button" name="submit">Reset Password</button></a>
-                    
-                    <div class="mt-5 text-center">
-                        <button class="btn btn-primary profile-button" type="submit" name="submit">Save Profile</button>
-                    </div>
-                </div>
-            </form>
+{% block links %}
+<style>
+    .modal {
+      z-index: 1051; /* Increase the z-index value to ensure the modal is displayed on top */
+    }
+  </style>
+{% endblock  %}
+{% block popup %}
+<div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="z-index: 1050;">
+      <div class="modal-content">
+          <div class="modal-header">
+            
+            <h5 class="modal-title w-100" id="otpModalLabel">Enter OTP</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
+        <div class="modal-body">
+            <span>A verification otp has been sent to your pre-registered mail</span>
+          <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="verifyOtpBtn">Verify</button>
+        </div>
+      </div>
     </div>
+  </div>
+{% endblock  %}
+{% block content %}
+
+
+<div class="container rounded bg-white col-md-8 col-sm-12 mt-5 mb-5"> 
+  <div class="row"> 
+    <div class="col-md-6 border-right"> 
+      <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+        <img class="rounded-circle mt-5 " src="https://www.pngall.com/wp-content/uploads/5/Profile-PNG-Photo.png" width='500px' height='500px' alt=''>
+        <h4 class="font-weight-bold text-uppercase">{{ request.user }}</h4>
+        <span class="text-black-50">{{ user.email }}</span>
+        <span> </span>
+      </div> 
+    </div> 
+    <div class="col-md-6 border-right"> 
+      <form id="profileForm" method="post" action="">
+        {% csrf_token %}
+        <div class="p-3 py-5">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-right">Profile Settings</h4>
+          </div> 
+          <div class="row mt-2"> 
+            <div class="col-md-12">
+              <label class="labels">Username</label>
+              <input type="text" class="form-control" placeholder="enter username" name="username" value="{{ user.username }}">
+            </div>
+            <div class="col-md-6">
+              <label class="labels">Name</label>
+              <input type="text" class="form-control" placeholder="first name" name="first_name" value="{{ user.first_name }}">
+            </div> 
+            <div class="col-md-6">
+              <label class="labels">Surname</label>
+              <input type="text" class="form-control" placeholder="surname" name="last_name" value="{{ user.last_name }}">
+            </div>
+          </div> 
+          <div class="row mt-3"> 
+            <div class="col-md-12">
+              <label class="labels">PhoneNumber</label>
+              <input type="text" class="form-control" placeholder="enter phone number" name="phone" value="{{ user.phone }}">
+            </div>
+            <div class="col-md-12">
+              <label class="labels">Email ID</label>
+              <input type="text" class="form-control" placeholder="enter email id" name="email" value="{{ user.email }}">
+            </div>
+          </div> 
+          <div class="row mt-3"> 
+            <div class="col-md-6">
+              <label class="labels">Country</label>
+              <input type="text" class="form-control" placeholder="country" name="country" value="">
+            </div>
+            <div class="col-md-6">
+              <label class="labels">State/Region</label>
+              <input type="text" class="form-control" placeholder="state" name="state" value="">
+            </div> 
+          </div> 
+          <a href="{%url 'change_password' user.id %}"><button class="btn btn-outline-danger profile-button mt-4" type="button" name="submit">Reset Password</button></a>
+          <div class="mt-5 text-center">
+            <button class="btn btn-primary profile-button" type="button" name="submit" onclick="saveProfile()">Save Profile</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
 <!-- ##### jQuery (Necessary for All JavaScript Plugins) ##### -->
 <script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script>
 <!-- Popper js -->
@@ -73,5 +103,93 @@
 <script src="{% static 'js/plugins.js' %}"></script>
 <!-- Active js -->
 <script src="{% static 'js/active.js' %}"></script>
+
+<script>
+   function sendEmail(oldEmail) {
+        // Get the user's email address
+        
+    
+        // Make an AJAX request to the Django view to send the email
+        $.ajax({
+          url: "{% url 'mail_to_emailchange' %}",
+          method: "POST",
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data: { email: oldEmail  },
+          success: function(response) {
+            console.log(response.success);
+          },
+          error: function(xhr, status, error) {
+            console.log("Failed to send email:", error);
+          }
+        });
+   }
+  function saveProfile() {
+    // Get the old email value from the server-side
+    var oldEmail = "{{ user.email }}";
+
+    // Get the entered email value from the form input
+    var enteredEmail = $("input[name='email']").val(); // Replace with the actual value from the form input
+
+    if (oldEmail !== enteredEmail) {
+      $('#otpModal').modal('show');
+       // Send the email to the user's email address
+       sendEmail(oldEmail);
+    } else {
+      // Submit the form using AJAX
+      $.ajax({
+        url: "{% url 'profile_details' %}",
+        method: "POST",
+
+        data: $("#profileForm").serialize(),
+        success: function(response) {
+          // Handle the success response if needed
+          console.log("Profile saved successfully");
+        },
+        error: function(xhr, status, error) {
+          // Handle the error response if needed
+          console.log("Error saving profile:", error);
+        }
+      });
+    }
+  }
+
+  $(document).ready(function() {
+    // Handle the OTP verification when the "Verify" button is clicked
+    $("#verifyOtpBtn").click(function() {
+      var otp = $("#otpInput").val();
+      var enteredEmail = $("input[name='email']").val();
+      // Perform the OTP verification using AJAX
+      $.ajax({
+        url: "{% url 'verify_otp_for_mail' %}",
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        data: { otp: otp , email : enteredEmail},
+        success: function(response) {
+          // Handle the success response if needed
+          console.log("OTP verified successfully");
+          $.ajax({
+            url: "{% url 'profile_details' %}",
+            method: "POST",
+    
+            data: $("#profileForm").serialize(),
+            success: function(response) {
+              // Handle the success response if needed
+              console.log("Profile saved successfully");
+              location.reload();
+            },
+            error: function(xhr, status, error) {
+              // Handle the error response if needed
+              console.log("Error saving profile:", error);
+            }
+          });
+        },
+        error: function(xhr, status, error) {
+          // Handle the error response if needed
+          console.log("OTP verification failed:", error);
+        }
+      });
+    });
+  });
+</script>
 
 {% endblock %}

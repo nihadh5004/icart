@@ -1,0 +1,58 @@
+{% extends 'base1.html' %}
+
+{% block content %}
+<section class="h-100 ">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100" >
+        <div class="col">
+          <div class="card card-registration my-4" style="background-color:grey;">
+            <div class="row g-0">
+              
+              <div class="col-xl-6">
+                <div class="card-body mt-5  text-black">
+                  <h3 class="mb-5 font-weight-bold ">Login</h3>
+
+                 <form action="/guest_signin" method='POST'>
+                  {% csrf_token %}
+                  <div class="form-outline mb-4  ">
+                      <label class="form-label" for="form3Example8">Username</label>
+                    <input type="text" id="form3Example8" name='username' class="form-control form-control-lg " />
+                  </div>
+
+  
+  
+                  <div class="form-outline mb-4 ">
+                      <label class="form-label" for="form3Example9">Enter Password</label>
+                      <input type="password" id="form3Example9" name='pass1' class="form-control form-control-lg" />
+                  </div>
+                
+  
+                  <div class="d-flex justify-content-center pt-3 ">
+                  
+                    <button type="submit" class="btn btn-dark w-25  ">Sign In</button>
+                  </div>
+                  <div class="col text-center py-2 ">
+                    <!-- Simple link -->
+                    <a class="text-dark " href="/_reset_password">Forgot password?</a>
+                  </div>
+                  <div class="text-center text-lg-start pt-2">
+                    
+                    <p class="small fw-bold mt-2  mb-0">Don't have an account? <a href="/signup"
+                        class="text-dark">Sign Up</a></p>
+                  </div>
+
+                 </form>
+                </div>
+              </div>
+              <div class="col-xl-6 d-none d-xl-block">
+                <img src="https://img.freepik.com/premium-vector/order-online-by-phone-basket-icon-online-shopping-by-iphone-vector-illustration-buy-now-add-cart_642540-99.jpg?w=2000"
+                  alt="Sample photo" class="img-fluid"
+                  style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock  %}

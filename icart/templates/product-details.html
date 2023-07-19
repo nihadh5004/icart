@@ -102,8 +102,13 @@
                                         <i class="fa fa-star" aria-hidden="true"></i>
                                         <i class="fa fa-star" aria-hidden="true"></i>
                                     </div>
-                                    <div class="review">
-                                        <a href="#">Write A Review</a>
+                                    <div class="ratings">
+                                        {% if  is_in_wishlist %}
+                                        <i class="fa fa-heart wishlist-icon" data-slug="{{ productvariant.slug }}" aria-hidden="True" style="font-size: 28px; cursor: pointer; "></i>
+                                      {% else %}
+                                        <i class="fa fa-heart-o wishlist-icon" data-slug="{{ productvariant.slug }}" aria-hidden="True" style="font-size: 28px; cursor: pointer;"></i>
+                                      {% endif %}
+                                      
                                     </div>
                                 </div>
                                 <!-- Avaiable -->
@@ -218,5 +223,63 @@
     <script src="{% static 'js/plugins.js' %}"></script>
     <!-- Active js -->
     <script src="{% static 'js/active.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.wishlist-icon').on('click', function() {
+              var variantSlug = $(this).data('slug');
+              var heartIcon = $(this);
+              
+              if (heartIcon.hasClass('fa-heart-o')) {
+                // Add to wishlist
+                add_wishlist(variantSlug);
+                heartIcon.removeClass('fa-heart-o').addClass('fa-heart');
+              } else {
+                // Remove from wishlist
+                remove_wishlist(variantSlug);
+                heartIcon.removeClass('fa-heart').addClass('fa-heart-o');
+              }
+            });
+          });
+          
+        function add_wishlist(variantSlug) {
+    
+             $.ajax({
+               url: "{% url 'addwishlist' %}",
+               method: "POST",
+               headers: { "X-CSRFToken": "{{ csrf_token }}" },
+               data: { slug: variantSlug  },
+               success: function(response) {
+    
+                 alert("item added to wishlist")
+                 
+    
+                 
+               },
+               error: function(xhr, status, error) {
+                 console.log("Failed to add:", error);
+               }
+             });
+        }
+        
+        function remove_wishlist(variantSlug) {
+    
+             $.ajax({
+               url: "{% url 'removewishlist' %}",
+               method: "POST",
+               headers: { "X-CSRFToken": "{{ csrf_token }}" },
+               data: { slug: variantSlug  },
+               success: function(response) {
+    
+                 alert("item removed from wishlist")
+                 
+    
+                 
+               },
+               error: function(xhr, status, error) {
+                 console.log("Failed to add:", error);
+               }
+             });
+        }
+    </script>
    
 {% endblock  %}

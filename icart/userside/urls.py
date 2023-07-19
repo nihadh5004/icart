@@ -19,4 +19,6 @@ urlpatterns = [
   path('initiate_refund', views.initiate_refund, name='initiate_refund'),
   path('change_password/<int:user_id>', views.change_password , name='change_password'),
   path('wallet' ,views.wallet, name='wallet'),
+  path('mail_to_emailchange' , views.mail_to_emailchange , name='mail_to_emailchange'),
+  path('verify_otp_for_mail' , views.verify_otp_for_mail , name='verify_otp_for_mail'),
 ]

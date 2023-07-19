@@ -8,6 +8,7 @@ from django.views.decorators.cache import cache_control
 from datetime import date
 from django.db.models import Sum, Count
 from datetime import datetime, timedelta
+from django.http import JsonResponse
 
 # from productside.forms import ProductForm
 
@@ -305,15 +306,18 @@ def order_details(request, order_id):
     return render (request, 'admin/order_details.html', context)
  
 # Function to ship the orders  from adminside 
-def ship_order(request, order_id):
+def update_order(request):
+    order_id = request.POST['order_id']
+    payment_status = request.POST['payment_status']
     order = get_object_or_404(Order, id=order_id)
 
     # Update the payment status to "Shipped"
-    order.payment_status = "SHIPPED"
+    order.payment_status = payment_status
     order.save()
 
-    return redirect('orderlist')
+    response_data = {'message': 'Order Status  Updated successfully'}
 
+    return JsonResponse(response_data)
 #Function to cancel order from adminside.
 def reject_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)

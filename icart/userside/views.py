@@ -8,16 +8,20 @@ from django.http import HttpResponseRedirect
 
 #checkout page 
 def checkout(request):
-    user=request.user
-    addresses=Address.objects.filter(user=user)
-    cart=UserCart.objects.get(user=user)
-    products=Cart.objects.filter(cart_id=cart)
-    if not products:
-        return redirect('shop')
-    context={
-        'addresses': addresses,
-    }
-    return render (request, 'checkout.html', context)
+    if request.user.is_authenticated:
+        user=request.user
+        addresses=Address.objects.filter(user=user)
+        cart=UserCart.objects.get(user=user)
+        products=Cart.objects.filter(cart_id=cart)
+        if not products:
+            return redirect('shop')
+        context={
+            'addresses': addresses,
+        }
+        return render (request, 'checkout.html', context)
+    else:
+        messages.error(request, 'You want signin to make an order')
+        return render(request,'authentication/guest_signin.html')
 
 #adding new address
 def add_address(request):
@@ -272,8 +276,7 @@ def profile_details(request):
         if not email   :
             messages.error(request , "Email Cant be blank")
             return redirect('profile_details')
-        if email !=user.email:
-            messages.success(request,'OTP Send to your mail')
+        
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
@@ -342,29 +345,35 @@ import razorpay
 def initiate_refund(request):
     client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
     order_id = request.POST.get('order_id')
-    order=Order.objects.get(id=order_id)
+    print(order_id)
+    order = Order.objects.get(id=order_id)
     payment_id = order.payment_id
+    print(payment_id)
     amount = order.total_price
     amount = int(float(amount))
     try:
         refund = client.payment.refund(payment_id, {
-            'amount': amount * 100,  
+            'amount': amount * 100,
             "speed": "optimum",
         })
 
         if refund.get('id'):
             # Refund successful
             refund_id = refund['id']
+            success = True
             # Perform any additional actions or update your database as required
-            return JsonResponse({'refund_id': refund_id})
+            data = {'refund_id': refund_id, 'success': success}
+            return JsonResponse(data)
         else:
             # Refund failed
             error_message = refund.get('error_description', 'Refund failed.')
             return JsonResponse({'error': error_message}, status=400)
 
     except Exception as e:
+        print(payment_id)
         # Handle any exceptions that occur during the refund process
         return JsonResponse({'error': str(e)}, status=500)
+
     
     
 def return_order(request):
@@ -411,3 +420,36 @@ def wallet(request):
     }
     
     return render(request, 'wallet.html' , context)
+
+import random
+from django.core.mail import send_mail , EmailMessage
+
+
+
+def mail_to_emailchange(request):
+            generated_otp=random.randint(100000,999999)
+            user=request.user
+            request.session['otp']=str(generated_otp)
+            
+            # sending OTP through mail
+            subject = 'iCart Confirmation OTP'
+            message = f'Hello {user.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
+            from_email=settings.EMAIL_HOST_USER
+            to_list=[user.email]
+            
+            send_mail(subject,message,from_email,to_list,fail_silently=True)
+            success = True
+            return JsonResponse({'success': success})
+ 
+def verify_otp_for_mail(request):
+    if request.method=='POST':
+        otp=request.POST['otp']
+        generated_otp=request.session.get('otp')
+        #checking the otp enterd is same as send to the email
+        if otp==generated_otp:
+          
+            del request.session['otp']
+            success=True
+            
+            return JsonResponse({'success': success})
+                   

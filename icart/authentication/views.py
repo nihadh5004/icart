@@ -204,7 +204,7 @@ def reset_password(request):
 
             current_site = get_current_site(request)
             r_subject = 'Reset Password @ iCart'
-            message3 = render_to_string('authentication/reset_content.html', {
+            message3 = render_to_string('authentication/r_content.html', {
                 'name': user.username,
                 'domain': current_site.domain,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
@@ -253,3 +253,68 @@ def update_password(request, user_id):
             messages.error(request,'Passwords didnt match, Please enter both passwords Correctly')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
   
+  
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def guest_signin(request):
+    
+    if request.method=='POST':
+        username=request.POST['username']
+        pass1=request.POST['pass1']
+        
+        user=authenticate(username=username, password=pass1)
+        
+        if user is not None:
+            generated_otp=random.randint(100000,999999)
+            request.session['otp']=str(generated_otp)
+            
+            # sending OTP through mail
+            subject = 'iCart Confirmation OTP'
+            message = f'Hello {user.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
+            from_email=settings.EMAIL_HOST_USER
+            to_list=[user.email]
+            
+            send_mail(subject,message,from_email,to_list,fail_silently=True)
+        
+            
+            # login(request, user)
+            # return redirect('home')
+            messages.success(request, 'OTP has been succesfully sent to your mail')
+            #rendering to the page where we can enter otp , also sending the primary key 
+            return render (request,'authentication/guest_otp_verification.html',{'user_for_otp':user.pk})
+        else: 
+            messages.error(request, 'invalid credentials')
+            return redirect('guest_signin')
+        
+        
+    return render(request, 'authentication/signin.html')
+
+from cartside.models import *
+
+def guest_verify_otp(request,user_for_otp):
+    
+    if request.method=='POST':
+        otp=request.POST['otp']
+        generated_otp=request.session.get('otp')
+        cart=request.session.get('cart_id')
+        guest_cart_id=UserCart.objects.get(id=cart)
+
+        #checking the otp enterd is same as send to the email
+        if otp==generated_otp:
+            myuser=User.objects.get(pk=user_for_otp)
+            login(request,myuser)
+            user_cart=UserCart.objects.get(user=myuser)
+            cart_items=Cart.objects.filter(cart_id=guest_cart_id)
+            for product in cart_items:
+                Cart.objects.create(
+                    cart_id=user_cart,
+                    product=product.product,
+                    quantity=product.quantity,
+                    price=product.price
+                )
+            del request.session['otp']
+            guest_cart_id.delete()
+            del request.session['cart_id']
+            return redirect('cart')
+        else:
+            messages.error(request,'invalid otp')
+            return redirect('signin')
