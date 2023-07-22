@@ -62,6 +62,12 @@
                             <input type="radio" class="custom-control-input payment-radio" id="paypal" name="paymentMethod" value='PREPAID'>
                             <label class="custom-control-label" for="paypal">Prepaid </label>
                         </div>
+                        {% if wallet.money > discount_price %}
+                        <div class="custom-control custom-radio mr-sm-2">
+                            <input type="radio" class="custom-control-input payment-radio" id="wallet" name="paymentMethod" value='WALLET'>
+                            <label class="custom-control-label" for="wallet">Pay Using Wallet </label>
+                        </div>
+                        {% endif %}
                     </div>
                     
                     <div class="cart-btn mt-100">
@@ -79,6 +85,7 @@
                         <ul class="summary-table">
                             <li><span>subtotal:</span> <span>${{total_price}}</span></li>
                             <li><span>delivery:</span> <span>Free</span></li>
+                            <li><span>discount:</span> <span>{{discount_amount}}</span></li>
                             {% if cart_id.coupon  %}
                             <li><span class='font-weight-bold'>Coupon</span> <a href="{% url 'delete_coupon' cart_id.id %}"><span>{{cart_id.coupon}}</span></li></a>
                             {% endif %}
@@ -107,7 +114,11 @@ function updatePaymentMethod() {
         ;  // Get the total_price value from Django template
 
         redirectToRazorpay(paymentMethod, total_price);
-    } else {
+    }else if (paymentMethod === "WALLET") {
+        // Redirect to the wallet page or perform any other wallet-related action
+        var total_price = "{{ discount_price}}"
+        redirectToWallet(paymentMethod,total_price);
+    }  else {
         var total_price = "{{ discount_price}}"
         sendPaymentMethodToServer(paymentMethod,total_price);
     }
@@ -121,6 +132,36 @@ function sendPaymentMethodToServer(paymentMethod,total_price) {
         data: { paymentMethod: paymentMethod, total_price: total_price },
         success: function(response) {
             window.location.href = "/order_confirmation/" + response.order_id;
+        },
+        error: function(xhr, status, error) {
+            console.log("Error:", error);
+        }
+    });
+    
+}
+
+function redirectToWallet(paymentMethod,total_price) {
+    $.ajax({
+        url: "/walletpay",
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        data: { paymentMethod: paymentMethod, total_price: total_price },
+        success: function(response) {
+            console.log(response.success)
+            $.ajax({
+                    url: "/place_order/{{address.id}}",
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    data: { paymentMethod: paymentMethod, total_price: total_price },
+                    success: function(response) {
+                        window.location.href = "/order_confirmation/" + response.order_id;
+                    },
+                    error: function(xhr, status, error) {
+                        console.log("Error:", error);
+                    }
+                });
+                
+            
         },
         error: function(xhr, status, error) {
             console.log("Error:", error);

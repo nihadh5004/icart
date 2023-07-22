@@ -67,7 +67,7 @@
           
             <button type="submit" class="btn">Submit</button>
           </form>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+        <a href="{{ download_link }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 class="fa fa-download fa-sm text-white-50"></i> Sales Report</a>
     </div>
 
@@ -227,7 +227,7 @@
                         <tbody>
                           {% for order in  recent_orders %}
                           <tr>
-                            <th >{{order.id}}</th>
+                            <th  >{{order.id}}</th>
                             <th >{{order.user.username}}</th>
                             <td>{{order.payment_status}}</td>
                             <td>{{ order.payment_method}}</td>

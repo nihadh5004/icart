@@ -28,7 +28,8 @@ from django.db.models import F
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def home(request):
-    
+  
+   
     sliders = Slider.objects.all()
     user = request.user
     name = user.username
@@ -102,11 +103,25 @@ def signup(request):
         email=request.POST['email']
         pass1=request.POST['pass1']    
         pass2=request.POST['pass2']    
-        
+        referral=request.POST['referral']  
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists. Please use a different email.')
+            return render(request, 'authentication/signup.html')  
+        if referral:
+            try:
+                referral_code_obj = ReferralCode.objects.get(referral_code=referral)
+                referrer = referral_code_obj.user
+            except ReferralCode.DoesNotExist:
+                messages.error(request, 'Invalid referral code')
+                return redirect('signup')
+
         myuser=User.objects.create_user(username,email,pass1)
         myuser.is_active=False
         myuser.save()
-        
+        if referral:
+            referral_user=ReferralCode.objects.get(user=myuser)
+            referral_user.referrer=referrer
+            referral_user.save()
         messages.success(request,'Please Verify Account from Your Email')
         
         #email
@@ -137,7 +152,7 @@ def signup(request):
     
     return render(request,'authentication/signup.html')
     
-    
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)    
 def activate(request,uidb64,token):
     try:
         uid=force_str(urlsafe_base64_decode(uidb64))
@@ -160,7 +175,7 @@ def activate(request,uidb64,token):
             myuser.delete()
 
         return render(request, 'authentication/verification_failed.html')
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signout(request):
     if request.user.is_authenticated:
         logout(request)
@@ -171,7 +186,7 @@ def signout(request):
 from twilio.rest import Client
 from django.conf import settings
 from django.http import HttpResponse
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def send_otp(phone_number):
     # Generate the OTP
     otp = '645736'  # Implement your OTP generation logic here
@@ -193,6 +208,7 @@ def send_otp(phone_number):
 from django.http import HttpResponseRedirect
 
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reset_password(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -227,7 +243,7 @@ def reset_password(request):
 
     return render(request, 'authentication/reset_password.html')
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def res_pass(request,uidb64,token):
     try:
         uid=force_str(urlsafe_base64_decode(uidb64))
@@ -237,7 +253,8 @@ def res_pass(request,uidb64,token):
     # checking the user and token doesnt has a conflict  
     if myuser is not None and generate_token.check_token(myuser,token):
         return render(request,'authentication/new_password.html' ,{'user': myuser})
-        
+   
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)     
 def update_password(request, user_id):
     if request.method =='POST':
         pass1=request.POST['pass1']
@@ -290,6 +307,7 @@ def guest_signin(request):
 
 from cartside.models import *
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guest_verify_otp(request,user_for_otp):
     
     if request.method=='POST':
@@ -298,7 +316,7 @@ def guest_verify_otp(request,user_for_otp):
         cart=request.session.get('cart_id')
         guest_cart_id=UserCart.objects.get(id=cart)
 
-        #checking the otp enterd is same as send to the email
+        #checking the otp entered is same as send to the email
         if otp==generated_otp:
             myuser=User.objects.get(pk=user_for_otp)
             login(request,myuser)

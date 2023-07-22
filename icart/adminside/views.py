@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect,get_object_or_404 , HttpResponse
 from django.contrib.auth import authenticate, login ,logout
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -14,7 +14,63 @@ from django.http import JsonResponse
 
 # Create your views here.
 
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import io
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.conf import settings
+import os
+import json
+from django.template import RequestContext
+from xhtml2pdf import pisa
+from authentication.models import *
 
+
+def download_template(request):
+    # Replace 'download_template.html' with the path to your HTML template file
+    template_name = 'admin/download_template.html'
+
+    # Get the JSON data from the request parameters
+    json_data = request.GET.get('json_data', '{}')
+    context_data = json.loads(json_data)
+
+    # Render the HTML template with the parsed context data
+    rendered_template = render_to_string(template_name, {'context_data': context_data})
+
+    # Create a PDF response
+    pdf_response = HttpResponse(content_type='application/pdf')
+    pdf_response['Content-Disposition'] = 'attachment; filename="ICART_SALES_REPORT.pdf"'
+
+    # Generate the PDF from the HTML content
+    pisa_status = pisa.CreatePDF(
+        src=rendered_template,
+        dest=pdf_response,
+    )
+
+    # Check if PDF generation was successful
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed', status=500)
+
+    return pdf_response
+
+import json
+from django.core.serializers import serialize
+from django.db.models.query import QuerySet
+from django.http import JsonResponse
+import decimal
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, QuerySet):
+            return serialize('json', obj)
+        elif isinstance(obj, date):
+            return obj.isoformat()
+        elif isinstance(obj, decimal.Decimal):
+            return float(obj)
+        elif isinstance(obj, Categories):  # Replace 'Categories' with the actual model name
+            return obj.category_name  # Replace 'category_name' with the actual attribute name in your model
+        else:
+            return super().default(obj)
 
 #  dashboard function of the admin 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -101,7 +157,27 @@ def _admin_dashboard(request):
                 'start_date' : start_date ,
                 'end_date' : end_date ,
             }
+            context_data = {
+                'order_counts': list(order_counts),
+                'total_price_sum': total_price_sum,
+                'total_orders': total_orders,
+                'top_products': list(top_products),
+                'total_deliveries': total_deliveries,
+                'total_pending': total_pending,
+                'start_date' : start_date ,
+                'end_date' : end_date ,
+                'categories': list(categories),
+                
+                  # Keep end_date as is, since it's already a string
+            }
+            
+              # Convert the context_data to a JSON string
+            json_data = json.dumps(context_data, cls=CustomJSONEncoder)
+            # Pass the JSON data to the download_template view
+            download_link = f"/download_template/?json_data={json_data}"
 
+            # Include the download_link in the context to use it in the dashboard.html template
+            context['download_link'] = download_link
             return render(request, 'admin/dashboard.html', context)
         else:
             return redirect('_admin_signin')
@@ -210,64 +286,7 @@ def productlist(request):
         'products': products
     }
     return render(request,'admin/productlist.html', context)
-
-
-
-
-# def create_product(request):
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             product = form.save(commit=False)
-#             product.save()
-
-#             images = request.FILES.getlist('images')
-#             for image in images:
-#                 ProductImage.objects.create(product=product, image=image)
-
-#             # Redirect to a view showing the list of products
-#             return redirect('product_list')  
-#     else:
-#         form = ProductForm()
-
-#     return render(request, 'create_product.html', {'form': form})
-
-
-# def save_product(request,product_id):
-#     if request.method == 'POST':
-        
-#         product = get_object_or_404(Product, id=product_id)
-#         form = ProductForm(request.POST, request.FILES, instance=product)
-
-#         if form.is_valid():
-#             product = form.save()
-#             product.save()
-            
-#             images = request.FILES.getlist('images')
-#             for image in images:
-#                 ProductImage.objects.create(product=product, image=image)
-#             # Redirect to the product list or another relevant view
-#             return redirect('productlist')
-#     else:
-#         form = ProductForm(instance=product)
-
-#     # If the form submission is invalid or the request method is not POST,
-#     # render the edit form again with the errors or empty form
-#     return render(request, 'edit_product.html', {'form': form})
-
-# def edit_product(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     form = ProductForm(instance=product)
-#     images=ProductImage.objects.filter(product=product_id)
-#     context = {'form': form,
-#                'product': product_id ,
-#                'images': images
-#                }
-#     return render(request, 'edit_product.html', context)
-
-
-
-    
+ 
     
 # Deleting the product from the website, still it will be in the database  
 def softdelete_product(request, product_id):
@@ -408,10 +427,11 @@ def add_variant(request, product_id):
          
         storage_obj = Storage.objects.get(storage=storage)
         color_obj = Color.objects.get(color=color)
-        if price is not None and discount is not None:
+        if price  and  discount  :
                 discount_price = float(price) - float(price) * (float(discount) / float(100))
         else:
             discount_price = None
+            discount=None
         variant = ProductVariant.objects.create(
             product=product,
             color=color_obj,
@@ -483,5 +503,115 @@ def delete_product_image(request,product_image_id):
     return redirect('productvariantlist' ,product_id=product)
 
 
+def couponlist(request):
+    coupons=Coupon.objects.all()
+    context={
+        "coupons" : coupons
+    }
+    return render (request, 'admin/couponlist.html', context)
 
+def create_coupon(request):
+    if request.method == 'POST':
+        # Retrieve the category name from the form data
+        coupon_name = request.POST['coupon_name']
+        discount_price = request.POST['discount_price']
+        minimum_amount = request.POST['minimum_amount']
+        
+        Coupon.objects.create(coupon_code=coupon_name , discount_price = discount_price , minimum_amount = minimum_amount)
+        
+        return redirect('couponlist')  
+        
+    return render(request, 'admin/create_coupon.html')
+
+def disable_coupon(request, coupon_id):
+    coupon=Coupon.objects.get(id=coupon_id)
+    coupon.is_expired = True
+    coupon.save()
+    return redirect('couponlist')
+
+def enable_coupon(request, coupon_id):
+    coupon=Coupon.objects.get(id=coupon_id)
+    coupon.is_expired = False
+    coupon.save()
+    return redirect('couponlist')
+
+def edit_coupon(request,coupon_id):
+    coupon=Coupon.objects.get(id=coupon_id)
+    if request.method == 'POST':
+        # Retrieve the category name from the form data
+        coupon_name = request.POST['coupon_name']
+        discount_price = request.POST['discount_price']
+        minimum_amount = request.POST['minimum_amount']
+        
+        coupon.coupon_code=coupon_name
+        coupon.discount_price=discount_price
+        coupon.minimum_amount=minimum_amount
+        coupon.save()
+        
+        return redirect('couponlist')  
+    context={
+        'coupon': coupon
+    }    
+    return render(request, 'admin/edit_coupon.html', context)
+
+
+def referral(request):
+    refer=ReferralOffers.objects.all().order_by('-id')
+    if refer:
+        referrer_amount=refer[0].referrer_amount
+        referral_discount=refer[0].referral_discount
+        referral_description=refer[0].referral_description    
+        
+        context={
+            "referrer_amount" : referrer_amount ,
+            "referral_discount" : referral_discount ,
+            "referral_description" : referral_description ,
+            'refer' : refer
+        }
+        
+        return render(request, 'admin/referral.html' , context)
+    return render(request, 'admin/referral.html' )
+
+def add_referral(request):
+    if request.method=='POST':
+        referrer_amount=request.POST['referrer_amount']
+        referral_discount=request.POST['referral_discount']
+        referral_description=request.POST['referral_description']
+        
+        ReferralOffers.objects.create(referrer_amount=referrer_amount,referral_discount=referral_discount, referral_description=referral_description  )
+        return redirect('referral')
     
+    return render (request, 'admin/add_referral.html')
+
+def edit_referral(request):
+    refer=ReferralOffers.objects.all().order_by('-id')
+    if refer:
+        referrer_amount=refer[0].referrer_amount
+        referral_discount=refer[0].referral_discount
+        referral_description=refer[0].referral_description    
+        
+       
+    if request.method=='POST':
+        referrer_amount=request.POST['referrer_amount']
+        referral_discount=request.POST['referral_discount']
+        referral_description=request.POST['referral_description']
+        
+        if refer:
+            refer[0].referrer_amount=referrer_amount
+            refer[0].referral_discount =referral_discount
+            refer[0].referral_description =  referral_description 
+            
+            refer[0].save()
+            return redirect('referral')
+    context={
+            "referrer_amount" : referrer_amount ,
+            "referral_discount" : referral_discount ,
+            "referral_description" : referral_description ,
+            'refer' : refer
+        }
+    return render(request, 'admin/edit_referral.html', context)
+
+def delete_referral(request):
+    refer=ReferralOffers.objects.all().order_by('-id')
+    refer[0].delete()
+    return redirect('referral')

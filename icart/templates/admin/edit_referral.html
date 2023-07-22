@@ -1,0 +1,47 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+
+<div class="cart-table-area section-padding-100 ml-5">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="checkout_details_area mt-50 clearfix">
+  
+                    <div class="cart-title">
+                        <h2>Add Referral Offer</h2>
+                    </div>
+  
+                    <form method="POST" action="/edit_referral" >
+                      {% csrf_token %}
+                        <div class="row">
+                            
+                          <div class="col-md-12">
+                            <div class="form-outline mb-4 mt-5">
+                                <label for="referrerAmount">Referrer Amount</label>
+                                <input type="number" class="form-control" name="referrer_amount" id="referrerAmount" placeholder="Enter Referrer Amount" value='{{referrer_amount}}'>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                          <div class="form-outline mb-4">
+                            <label for="referralDiscount">Referral Discount</label>
+                            <input type="number" class="form-control" name="referral_discount" id="referralDiscount" placeholder="Enter Referral Discount" value='{{referral_discount}}'>
+                          </div>
+                       </div>
+                       <div class="form-outline col-md-12 text-left">
+                        <label class="form-label" for="contactBlockMessage4">Description</label>
+                        <textarea class="form-control" id="contactBlockMessage4" rows="4" name="referral_description">{{ referral_description }}</textarea>
+                    </div>
+                    
+                      
+                        <button class='btn btn-outline-success col-md-12  px-4 mt-5 ' type='submit'>Change Referral</button>
+                        <div class="form-outline mb-4 mt-5">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+  </div>
+{% endblock  %}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" integrity="sha256-2XFplPlrFClt0bIdPgpz8H7ojnk10H69xRqd9+uTShA=" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        body {
+            margin-top: 20px;
+            background-color: #eee;
+        }
+        
+        .card {
+            box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
+        }
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid rgba(0,0,0,.125);
+            border-radius: 1rem;
+        }
+
+        /* Table styles */
+        .table {
+            width: 100%;
+        }
+
+        .table tbody tr  {
+            height: 40px; /* Set a fixed height for table rows */
+        }
+        .table thead tr  {
+            height: 40px; /* Set a fixed height for table rows */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="invoice-title">
+                            <h4 class="float-end font-size-15">Sales Report</h4>
+                            <div class="">
+                                <h2 class="mb-1 text-muted">iCart.com</h2>
+                            </div>
+                            <div class="text-muted">
+                                <h5 class="mb-1">A Complete Apple Solution.</h5>
+                                <p class="mb-1"><i class="uil uil-envelope-alt me-1"></i>icart@yahoo.co.in</p>
+                                <p><i class="uil uil-phone me-1"></i>+919546293453</p>
+                                <span id="date"><i class="uil uil-phone me-1"></i></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <table style="width: 100%;">
+                            <tr>
+                               
+                                <td style="width: 50%; vertical-align: top;">
+                                    <div class="text-muted">
+                                        <h5 class="font-size-16 mb-3" style="text-align: left;">DELIVERED ORDERS: {{context_data.total_deliveries}}</h5>
+                                        <h5 class="font-size-15 mb-2" style="text-align: left;">PENDING REQUESTS: {{context_data.total_pending}}</h5>
+                                        <div class="card shadow mb-4">
+                                            <div class="card-header py-3" style="text-align: left;">
+                                                <h6 class="m-0 font-weight-bold" style="text-align: left;">Top Selling Items</h6>
+                                            </div>
+                                            <div class="card-body" style="text-align: left;">
+                                                <table class="table table-striped table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            
+                                                            <th class="text-center" style="border: 1px solid black; text-align: center;">Product Name</th>
+                                                            <th class="text-center" style="border: 1px solid black; text-align: center;">Total Sales</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for  product in context_data.top_products %}
+                                                        <tr>
+                                                            
+                                                            <td class="text-center" style="border: 1px solid black; text-align: center;">{{ product.product__product__name }}</td>
+                                                            <td class="text-center" style="border: 1px solid black; text-align: center;">{{ product.total_sales }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="width: 50%; vertical-align: top; text-align: right;">
+                                    <div style="text-align: right;">
+                                        <h5 class="font-size-15 mb-1">Report Start Date:</h5>
+                                        <p>{{context_data.start_date}}</p>
+                                    </div>
+                                    <div class="mt-4" style="text-align: right;">
+                                        <h5 class="font-size-15 mb-1">Report End Date:</h5>
+                                        <p>{{context_data.end_date}}</p>
+                                    </div>
+                                    <div class="mt-4" style="text-align: right;">
+                                        <h5 class="font-size-15 mb-1">Total Orders:</h5>
+                                        <p>{{context_data.total_orders}}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                            <!-- end col -->
+                        
+                            
+                            <!-- end col -->
+                        </div>
+                        
+                        
+                        <!-- end row -->
+
+                        <div class="py-2">
+                            <h5 class="font-size-15">Order Summary</h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered align-middle mb-0" style="border-collapse: collapse; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="border: 1px solid black; text-align: center;">Date</th>
+                                            <th class="text-center" style="border: 1px solid black; text-align: center;">Total Orders</th>
+                                            <th class="text-center" style="border: 1px solid black; text-align: center;">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loop through the order counts data and display each row -->
+                                        {% for order_count in context_data.order_counts %}
+                                        <tr>
+                                            <td class="text-center" style="border: 1px solid black; text-align: center;">{{ order_count.order_date__date }}</td>
+                                            <td class="text-center" style="border: 1px solid black; text-align: center;">{{ order_count.order_count }}</td>
+                                            <td class="text-center" style="border: 1px solid black; text-align: center;">${{ order_count.total_price_sum }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <!-- Add the total row -->
+                                        <tr>
+                                            <th colspan="2" class="text-end" style="border: 1px solid black; ">Total</th>
+                                            <td class="text-end" style="border: 1px solid black; text-align: center;">${{ context_data.total_price_sum }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end col -->
+        </div>
+    </div>
+
+    <script>
+        // Get today's date
+        var today = new Date();
+
+        // Format the date as desired
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var formattedDate = today.toLocaleDateString('en-US', options);
+
+        // Set the formatted date as the content of the <h5> element
+        document.getElementById("date").textContent = formattedDate;
+    </script>
+
+</body>
+</html>

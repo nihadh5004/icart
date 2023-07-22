@@ -10,6 +10,7 @@ urlpatterns = [
     path('productlist', views.productlist  ,name='productlist'),
     path('categorylist', views.categorylist , name='categorylist'),
     path('create_category', views.create_category , name='create_category'),
+    
     # path('create_product', views.create_product , name='create_product'),
     # path('edit_product/<int:product_id>/', views.edit_product, name='edit_product'),
     path('delete_product_image/<int:product_image_id>' , views.delete_product_image , name='delete_product_image'),
@@ -24,4 +25,15 @@ urlpatterns = [
     path('productvariantlist/<int:product_id>' , views.productvariantlist , name='productvariantlist'),
     path('add_variant/<int:product_id>' , views.add_variant , name='add_variant'),
     path('edit_variant/<int:variant_id>' , views.edit_variant , name='edit_variant'),
+   
+    path('download_template/', views.download_template, name='download_template'),
+    path('couponlist', views.couponlist, name='couponlist'),
+    path('create_coupon', views.create_coupon , name='create_coupon'),
+    path('disable_coupon/<int:coupon_id>' , views.disable_coupon , name='disable_coupon'),
+    path('enable_coupon/<int:coupon_id>' , views.enable_coupon , name='enable_coupon'),
+    path('edit_coupon/<int:coupon_id>' , views.edit_coupon , name='edit_coupon'),
+    path('referral', views.referral , name='referral'),
+    path('add_referral', views.add_referral , name='add_referral'),
+    path('edit_referral', views.edit_referral , name='edit_referral'),
+    path('delete_referral', views.delete_referral , name='delete_referral'),
 ]

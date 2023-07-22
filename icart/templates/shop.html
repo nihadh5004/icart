@@ -23,13 +23,16 @@
         </div>
     </div>
 
-    
+    <button id="applyFilterButton" class='btn '>Filter Products</button>
 
-    <!-- ##### Single Widget ##### -->
-    <div class="widget color mb-50">
+    
+   
+   
+
+    <!-- ##### Single Widget - Color ##### -->
+    <div class="widget color mb-50 mt-5" style="display: none;">
         <!-- Widget Title -->
         <h6 class="widget-title mb-30">Color</h6>
-
         <div class="widget-desc">
             <ul class="d-flex">
                 <li><a href="#" class="color1"></a></li>
@@ -37,10 +40,11 @@
                
             </ul>
         </div>
+        
     </div>
 
-    <!-- ##### Single Widget ##### -->
-    <div class="widget price mb-50">
+    <!-- ##### Single Widget - Price ##### -->
+    <div class="widget price mb-50" style="display: none;">
         <!-- Widget Title -->
         <h6 class="widget-title mb-30">Price</h6>
 
@@ -54,8 +58,12 @@
                 <div class="range-price">$10 - $1000</div>
             </div>
         </div>
-        <a href="?max_price=500.00"><button>300</button></a>
+        
     </div>
+    <div><button id='apply-btn' class='btn' style="display: none;" onclick="applyFilters()">Apply</button></div>
+
+    
+    
 </div>
 
 <div class="amado_product_area section-padding-100">
@@ -67,19 +75,7 @@
                     <!-- Total Products -->
                     
                     <!-- Sorting -->
-                    <div class="product-sorting  d-flex">
-                        <div class="sort-by-date d-flex align-items-center mr-15">
-                            <p>Sort by</p>
-                            <form action="#" method="get">
-                                <select name="select" id="sortBydate">
-                                    <option value="value">Newest</option>
-                                    <option value="value">Popular</option>
-                                    <option value="value">Price</option>
-                                </select>
-                            </form>
-                        </div>
-                        
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -87,45 +83,46 @@
         <div class="row">
 
             <!-- Single Product Area -->
-            {% for product in products %}
-            <div class="col-12 col-sm-6 col-md-12 col-xl-6">
-                <div class="single-product-wrapper">
-                    {% if product.selected_variant %}
-                    <a href="{% url 'product_detail' product.slug %}?color={{ product.selected_variant.color }}&storage={{ product.selected_variant.storage }}">
-                        <!-- Product Image -->
-                        <div class="product-img">
-                            <img src="{{ product.selected_variant.displayimage.url }}" alt="">
-                            <!-- Hover Thumb -->
-                            <img class="hover-img" src="{{ product.selected_variant.displayimage.url }}" alt="">
-                        </div>
-                    </a>
-                    {% endif %}
-                    <!-- Product Description -->
-                    <div class="product-description d-flex align-items-center justify-content-between">
-                        <!-- Product Meta Data -->
-                        <div class="product-meta-data">
-                            <div class="line"></div>
-                            <p class="product-price">${{ product.selected_variant.price }}</p>
-                            <h6>{{ product.name }}</h6>
-                        </div>
-                        <!-- Ratings & Cart -->
-                        <div class="ratings-cart text-right">
-                            <div class="ratings">
-                                <i class="fa fa-star" aria-hidden="true"></i>
-                                <i class="fa fa-star" aria-hidden="true"></i>
-                                <i class="fa fa-star" aria-hidden="true"></i>
-                                <i class="fa fa-star" aria-hidden="true"></i>
-                                <i class="fa fa-star" aria-hidden="true"></i>
-                            </div>
-                            <div class="cart">
-                                <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="img/core-img/cart.png" alt=""></a>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Single Product Area -->
+{% for product in products %}
+{% if product.selected_variant %}
+<div class="col-12 col-sm-6 col-md-12 col-xl-6">
+    <div class="single-product-wrapper">
+        <a href="{% url 'product_detail' product.slug %}?color={{ product.selected_variant.color }}&storage={{ product.selected_variant.storage }}">
+            <!-- Product Image -->
+            <div class="product-img">
+                <img src="{{ product.selected_variant.displayimage.url }}" alt="">
+                <!-- Hover Thumb -->
+                <img class="hover-img" src="{{ product.selected_variant.displayimage.url }}" alt="">
+            </div>
+        </a>
+        <!-- Product Description -->
+        <div class="product-description d-flex align-items-center justify-content-between">
+            <!-- Product Meta Data -->
+            <div class="product-meta-data">
+                <div class="line"></div>
+                <p class="product-price">${{ product.selected_variant.price }}</p>
+                <h6>{{ product.name }}</h6>
+            </div>
+            <!-- Ratings & Cart -->
+            <div class="ratings-cart text-right">
+                <div class="ratings">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <div class="cart">
+                    <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="img/core-img/cart.png" alt=""></a>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 
-            {% endfor %}
             <!-- Pagination -->
             {% if products.has_other_pages %}
             <div class="row w-100 col-12">
@@ -167,7 +164,56 @@
 <script src="{% static 'js/plugins.js' %}"></script>
 <!-- Active js -->
 <script src="{% static 'js/active.js' %}"></script>
+<script>
+    var minPrice, maxPrice; // Variables to store min and max values
 
+    $('.slider-range-price').on('slide', function(event, ui) {
+        var slider = $(this);
+        minPrice = ui.values[0]; // The min value selected on the slider
+        maxPrice = ui.values[1]; // The max value selected on the slider
+        
+        console.log('Slider Min Value:', minPrice);
+        console.log('Slider Max Value:', maxPrice);
+    });
+
+    // Function to handle the "Apply" button click
+    function applyFilters() {
+        var category_id = '{{ category_id }}'; // Get the selected category_id if available
+        if (typeof maxPrice === 'undefined') {
+            maxPrice = 1000;
+            minPrice=10;
+        }
+        // Construct the URL with the selected min and max prices and category_id (if available)
+        var url = '{% url "shop" %}?max_price=' + maxPrice;
+        if (minPrice) {
+            url += '&min_price=' + minPrice;
+        }
+        if (category_id) {
+            url += '&category=' + category_id;
+        }
+        
+        // Redirect to the filtered URL
+        window.location.href = url;
+    }
+    
+</script>
+<script>
+    // Add an event listener to the "Apply Filter" button
+$('#applyFilterButton').on('click', function() {
+    // Toggle the visibility of the filter options (Color and Price)
+    $('.product-sorting, .widget.color, .widget.price ,#apply-btn  , #sort ').toggle();
+
+    
+});
+
+</script>
+{% comment %} <script>
+    // Add an event listener to the "Apply Filter" button
+    $('#applyFilterButton').on('click', function() {
+        // Toggle the visibility of the filter options (Color and Price)
+        $('.widget.color, .widget.price , #apply-btn').toggle();
+    });
+</script> {% endcomment %}
 <script>
     $(document).ready(function() {
         $('.wishlist-icon').on('click', function() {

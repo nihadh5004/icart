@@ -270,6 +270,10 @@ body {
                   <a href="#" onclick="initiateRefundAndCancelOrder('{{ order.id }}')">  
                   <button class="btn btn-outline-danger ">Cancel Order</button>
                   </a>
+                  {% elif order.payment_method == 'WALLET' %}
+                  <a href="#" onclick="WalletRefundAndCancelOrder('{{ order.id }}')">  
+                  <button class="btn btn-outline-danger ">Cancel Order</button>
+                  </a>
                   {% else %}
                   <a href=""  onclick="cancelOrder('{{ order.id }}')" >  
                   <button class="btn btn-outline-danger">Cancel Order</button>
@@ -303,6 +307,7 @@ toggleButton.addEventListener('click', () => {
 </script>
 <script>
   function initiateRefundAndCancelOrder(orderId) {
+    if (confirm("Are you sure you want to cancel this order?")) {
     // AJAX call to initiate refund
     $.ajax({
       url: '/initiate_refund',
@@ -310,17 +315,70 @@ toggleButton.addEventListener('click', () => {
       headers: { 'X-CSRFToken': '{{ csrf_token }}' },
       data: { order_id: orderId },
       success: function(response) {
-        alert('Refund inititated, will be back in 2-7 days')
-        cancelOrder(orderId);
+          alert('Refund initiated, will be back in 2-7 days');
+          $.ajax({
+            url: '/_cancel_order' ,
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: { order_id: orderId },
+            success: function(response) {
+              alert('Order has been succesfully cancelled')
+              location.reload();
+              // Order canceled successfully
+              // Handle any additional actions or update the UI as needed
+            },
+            error: function(xhr, status, error) {
+              console.log('Cancel order error:', error);
+              // Handle the cancel order error if needed
+            }
+          });
       },
       error: function(xhr, status, error) {
-        console.log('Refund error:', error);
-        // Handle the refund error if needed
+          console.log('Refund error:', error);
+          var errorMessage = xhr.responseJSON.error_message;
+          alert(errorMessage);
       }
-    });
-  }
+  });
+}
+}
+  
+  function WalletRefundAndCancelOrder(orderId) {
+    if (confirm("Are you sure you want to cancel this order?")) {
+    // AJAX call to initiate refund
+    $.ajax({
+      url: '/wallet_refund',
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      data: { order_id: orderId },
+      success: function(response) {
+          $.ajax({
+            url: '/_cancel_order' ,
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: { order_id: orderId },
+            success: function(response) {
+              alert('Order has been succesfully cancelled')
+              location.reload();
+              // Order canceled successfully
+              // Handle any additional actions or update the UI as needed
+            },
+            error: function(xhr, status, error) {
+              console.log('Cancel order error:', error);
+              // Handle the cancel order error if needed
+            }
+          });
+      },
+      error: function(xhr, status, error) {
+          console.log('Refund error:', error);
+          var errorMessage = xhr.responseJSON.error_message;
+          alert(errorMessage);
+      }
+  });
+}
+}
   
   function cancelOrder(orderId) {
+    if (confirm("Are you sure you want to cancel this order?")) {
     // AJAX call to cancel the order
     $.ajax({
       url: '/_cancel_order' ,
@@ -339,6 +397,7 @@ toggleButton.addEventListener('click', () => {
       }
     });
   }
+}
   
 </script>
 

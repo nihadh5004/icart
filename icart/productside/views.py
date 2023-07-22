@@ -3,25 +3,36 @@ from django.core.paginator import Paginator
 from .models import *
 from django.shortcuts import get_object_or_404
 from cartside.models import *
-
+from django.db.models import F, Q
+from django.contrib import messages
 # Create your views here.
 def shop(request):
    
         
     category_id = request.GET.get('category')  # Get the selected category ID from the query parameters
     max_price = request.GET.get('max_price')
+    min_price = request.GET.get('min_price')
+    search = request.GET.get('search')
+
 
     products = Product.objects.filter(is_active=True)
-    if category_id:
-        products = products.filter(category_id=category_id)  # Filter products by the selected category ID
+    if category_id is not None and category_id != 'None':
+        products = products.filter(category_id=category_id)
+    filtered_products=[]
+    if search:
+        # Filter products based on the search query
+        products = products.filter(Q(name__icontains=search) | Q(description__icontains=search))
     for product in products:
-        if max_price:
-            selected_variant = product.productvariant_set.filter(price__lte=max_price).first()
+        if max_price and min_price:
+            selected_variant = product.productvariant_set.filter(price__lte=max_price, price__gte=min_price).first()
+            if selected_variant:
+                filtered_products.append(product)
         else:
             selected_variant = product.productvariant_set.all().order_by('?').first()
         product.selected_variant = selected_variant
-
-
+    
+    if max_price:
+        products=filtered_products
     categories = Categories.objects.all()
     
     # Pagination
@@ -46,11 +57,22 @@ def shop(request):
 def product_detail(request, slug):
     product = Product.objects.get(slug=slug)
     color = request.GET.get('color')  # Get the color value from the URL query parameters
-    color_id=Color.objects.get(color=color)
+    color_id = Color.objects.get(color=color)
     storage = request.GET.get('storage')  # Get the storage value from the URL query parameters
-    storage_id=Storage.objects.get(storage=storage)
-    productvariant = get_object_or_404(ProductVariant, product=product, color=color_id.id, storage=storage_id.id)
-    
+    storage_id = Storage.objects.get(storage=storage)
+    try:
+        # Try to retrieve the ProductVariant for the selected color and storage
+        productvariant = ProductVariant.objects.get(product=product, color=color_id, storage=storage_id)
+    except ProductVariant.DoesNotExist:
+        try:
+            # Try to retrieve a ProductVariant with the selected color and any available storage
+            messages.error(request,'Sorry! Requested storage is not available')
+            productvariant = ProductVariant.objects.filter(product=product, color=color_id).first()
+        except ProductVariant.DoesNotExist:
+            # Retrieve a ProductVariant with any available color and any available storage
+            messages.error(request,'Sorry! Requested colour is not available')
+            productvariant = ProductVariant.objects.first()
+
     
     storages=ProductVariant.objects.filter(product=product).values_list('storage__storage',flat=True).distinct()
     colors=ProductVariant.objects.filter(product=product).values_list('color__color',flat=True).distinct()

@@ -5,25 +5,31 @@ from decimal import Decimal
 from django.db.models import Sum
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder  # Import DjangoJSONEncoder
+from django.views.decorators.cache import cache_control
 
 # Create your views here.
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def addcart(request, slug):
+    #if user is logged in 
         if request.user.is_authenticated:
             user=request.user
             cart = UserCart.objects.get(user=user)
+            # if user is not logged in 
         else:
             cart_id=request.session.get('cart_id')
             if not cart_id:
                 cart=UserCart.objects.create()
                 request.session['cart_id']=cart.id
             else :
-                cart=UserCart.objects.get(id=cart_id)   
+                cart=UserCart.objects.get(id=cart_id)
+        #taking the quantity as value and passing it to database   
         if request.method == 'POST':
             quantity = int(request.POST.get('quantity'))
             productvariant = get_object_or_404(ProductVariant, slug=slug)
             user = request.user
             price = Decimal(productvariant.price)
             totalprice = price * Decimal(quantity)
+            #if the product has discount price then applying it
             if productvariant.discount_price:
                 totalprice = productvariant.discount_price * Decimal(quantity)
             
@@ -47,9 +53,11 @@ def addcart(request, slug):
     
     
 def cart(request):
+    #Checking if the user is logged in 
         if request.user.is_authenticated:
             user=request.user
             cart_id=UserCart.objects.get(user=user)
+    #if user is not logged in 
         else:
             cart=request.session.get('cart_id')
             if not cart:
@@ -62,22 +70,26 @@ def cart(request):
         products=Cart.objects.filter(cart_id=cart_id)
         productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
         total_price = productstotal['total_price']
+        #if cart doesnt have any product then redirect to shop
         if not products:
             cart_id.coupon =None
             cart_id.save()
             messages.error(request, 'The cart is empty, Please add something to the cart')
             return redirect('shop')
         
-        
+        #The coupon functionality
         if request.method=='POST':
             coupon=request.POST['coupon']
             coupon_obj=Coupon.objects.filter(coupon_code=coupon)
+            #if the coupon is invalid
             if not coupon_obj:
                 messages.error(request, 'Invalid Coupon')
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            # if user already entered a coupon 
             if cart_id.coupon:
                 messages.error(request , 'Coupon already exists')
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            #If the cart amount is less than coupon min. amount
             if total_price < coupon_obj[0].minimum_amount :
                 messages.error(request, f'Amount should be greater than  {coupon_obj[0].minimum_amount}.')
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -86,12 +98,13 @@ def cart(request):
             cart_id.coupon=coupon_obj[0]
             cart_id.save()
             messages.success(request, 'Coupon applied succesfully')
-
+        #Rechecking the user doesnt deleted and reduced the cart amount less than coupon min. amount
         if cart_id.coupon:
             if cart_id.coupon.minimum_amount > total_price:
                 messages.error(request, f'Amount should be greater than  {cart_id.coupon.minimum_amount}.')
                 cart_id.coupon=None
                 cart_id.save()
+        #if cart has a coupon then changing the price according to coupon 
         if cart_id.coupon:    
             discount_price= total_price - cart_id.coupon.discount_price
         else:
@@ -112,35 +125,10 @@ def getcart(request):
     if request.user.is_authenticated:
         # User is logged in, redirect to the cart view
         return redirect('cart')
-    
-    # else:
-    #     # User is not logged in, create a session-based cart
-    #     cart_id = request.session.get('cart_id')
-    #     print(cart_id)
-    #     if not cart_id:
-    #         # Generate a unique identifier for the cart
-    #         cart_id = get_random_string(length=32)
-    #         request.session['cart_id'] = cart_id
-    #         print(cart_id)
-        
-    #     # Get the cart items using the session-based cart identifier
-    #     guest_cart_str = request.session.get('guest_cart', '{}')
-    #     try:
-    #         guest_cart = json.loads(guest_cart_str)
-    #     except json.JSONDecodeError:
-    #         guest_cart = {}  # Initialize as an empty dictionary if not valid JSON
-            
-    #     context = {
-    #         'cart_id': cart_id,
-    #         'products': guest_cart.values(),
-    #         # 'total_price': sum(item['price'] for item in guest_cart.values()),
-    #         # 'discount_price': total_price  # You can set this as per your logic
-    #     }
 
-    #     return render(request, 'cart.html', context)
-
-
-def delete_coupon(request, cart_id):    
+#using to remove coupon
+def delete_coupon(request, cart_id):  
+      
     cart=UserCart.objects.get(id=cart_id)
     cart.coupon = None
     cart.save()
@@ -151,6 +139,7 @@ def delete_coupon(request, cart_id):
 
 import json
 from django.http import JsonResponse
+# Function to update quantity from cart when pressing add or minus
 def update_quantity(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         product_id = request.POST.get('product_id')
@@ -187,6 +176,8 @@ def update_quantity(request):
 
     return JsonResponse(response_data, status=400)
 
+
+#function to remove item from the cart
 def removecart(request,product_id):
     product=Cart.objects.get(id=product_id)
     product.delete()
@@ -195,6 +186,8 @@ def removecart(request,product_id):
 
 
 from django.http import JsonResponse
+
+#function to add item to wishlist
 def addwishlist(request):
     user=request.user
     slug=request.POST['slug']
@@ -209,6 +202,8 @@ def addwishlist(request):
     
     return JsonResponse({success : 'success'})
 
+
+#function to remove item from wishlist
 def removewishlist(request):
     user=request.user
     slug=request.POST['slug']
@@ -223,7 +218,7 @@ def removewishlist(request):
     
     return JsonResponse({success : 'success'})
     
-    
+#function to render wishlist page   
 def wishlist(request):
     user =request.user
     wishlist=UserWishlist.objects.get(user=user)

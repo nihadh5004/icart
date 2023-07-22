@@ -1,0 +1,58 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+   
+    
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Coupons</h6>
+            <a href="/create_coupon"><button class='btn btn-outline-success mt-2'>Add Coupons</button></a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                        <th scope="col">Coupon Code</th>
+                        <th scope="col">Expired </th>
+                        <th scope="col">Coupon  Discount</th>
+                        <th scope="col">Coupon min. Amount</th>
+                        <th scope="col">Actions</th>
+                       
+                      </tr>
+                  </thead>
+                   
+                  <tbody>
+                    {% for coupon in  coupons %}
+                    <tr>
+                      <th >{{coupon.coupon_code}}</th>
+                      <td>{{ coupon.is_expired}}</td>
+                      <td>{{ coupon.discount_price}}</td>
+                      
+                      <td>{{ coupon.minimum_amount}}</td>
+                      <td>
+                     <a href="{%url 'edit_coupon'  coupon.id%}"><button class='btn btn-outline-secondary'>Edit</button></a>
+                     {% if coupon.is_expired %}
+                    <a href="{%url 'enable_coupon'  coupon.id%}"><button class='btn btn-outline-secondary'>Enable</button></a>
+                     {% else %}
+                     <a href="{%url 'disable_coupon'  coupon.id%}"><button class='btn btn-outline-danger'>Disable</button></a>
+                     {% endif %}
+                    </td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  
+  </div>
+  <!-- /.container-fluid -->
+  
+  </div>
+
+{% endblock  %}

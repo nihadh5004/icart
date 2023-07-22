@@ -1,0 +1,27 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+
+    <form class="ml-5 mt-5" method='post' action="/create_coupon">
+        
+        {% csrf_token %}
+        <div class="form-group">
+        <label for="exampleInputEmail1">Coupon Name</label>
+        <input type="text" class="form-control"  name='coupon_name' id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter category name">
+        
+
+        <label for="exampleInputEmail1">Coupon Discount</label>
+        <input type="number" class="form-control"  name='discount_price' id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter category name">
+        
+
+        <label for="exampleInputEmail1">Minimum Amount</label>
+        <input type="number" class="form-control"  name='minimum_amount' id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter category name">
+        </div>
+        
+        
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+{% endblock  %}

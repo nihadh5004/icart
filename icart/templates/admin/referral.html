@@ -1,0 +1,27 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="card shadow mb-4 w-50 ml-5 mt-5">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Referral Offers</h6>
+        {% if  not refer %}
+        <a href="/add_referral">
+        <button class='btn btn-outline-secondary mt-2'>Add Referral Offer</button></a>
+        {% endif %}
+    </div>
+    {% if refer %}
+    <div class="card-body ">
+        <ul>
+            
+                <li>Referrer Amount : {{referrer_amount}}</li>
+                <li>Referral Discount : {{referral_discount}}</li>
+                <li>Refer Description : {{referral_description}}</li>
+            
+        </ul>
+        <a href="/edit_referral"><button class='btn'>Change Referral Offer</button></a>
+        <a href="/delete_referral"><button class='btn'>Remove Offer</button></a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock  %}

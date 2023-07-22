@@ -4,6 +4,7 @@ from django.contrib import messages
 from cartside.models import *
 from django.db.models import Sum
 from django.http import HttpResponseRedirect
+from authentication.models import *
 # Create your views here.
 
 #checkout page 
@@ -76,22 +77,35 @@ def edit_address(request, address_id):
 def payment_page(request, address_id):
     address = Address.objects.get(id=address_id)
     user=request.user
+    refer_table=ReferralOffers.objects.all()
     cart_id=UserCart.objects.get(user=user)
-    
+    wallet=Wallet.objects.get(user=user)
     products=Cart.objects.filter(cart_id=cart_id)
     productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
     total_price = productstotal['total_price']
-    
+    discount_amount=0
     #If the user applied any coupon
     if cart_id.coupon:    
         discount_price= total_price - cart_id.coupon.discount_price
     else:
         discount_price = total_price
+        
+    referral_code_obj = ReferralCode.objects.get(user=user)
+    old_orders=Order.objects.filter(user=user)
+    if refer_table:
+        if referral_code_obj.referrer and not old_orders:
+            refer_discount=refer_table[0].referral_discount
+            discount_amount = min(total_price * Decimal(refer_discount) / Decimal('100'), Decimal('100'))
+            discount_price -= discount_amount
+        
+       
     context={
         'address': address ,
         'total_price' : total_price ,
         'discount_price' : discount_price ,
         'cart_id' : cart_id ,
+        'wallet': wallet ,
+        'discount_amount' : discount_amount
     }
     
     return render (request,'payment.html', context)
@@ -113,8 +127,20 @@ def place_order(request, address_id):
         # total_price = productstotal['total_price']
         # if cart_id.coupon:
         #     total_price = productstotal['total_price'] - cart_id.coupon.discount_price
-            
-        
+        refer_table=ReferralOffers.objects.all()
+        referral_code_obj = ReferralCode.objects.get(user=user)
+        old_orders=Order.objects.filter(user=user)
+        if refer_table:
+            if referral_code_obj.referrer and not old_orders:    
+                referrer = referral_code_obj.referrer  # Assuming 'referrer' is the field containing the referrer user
+                referrer_wallet = Wallet.objects.get(user=referrer)
+                referrer_money=refer_table[0].referrer_amount
+                if referrer_wallet.money==None:
+                    referrer_wallet.money = referrer_money
+                else:
+                    referrer_wallet.money += referrer_money
+                referrer_wallet.save()
+   
         order=Order.objects.create(user=user ,address=address, total_price=total_price, payment_status= 'ORDERED' ,payment_method = paymentMethod ,payment_id= payment_id  )
         
         cart_items=Cart.objects.filter(cart_id=cart_id)
@@ -255,10 +281,12 @@ def address(request):
     }
     return render (request, 'address.html', context)
 
-
+from authentication.models import ReferralCode
 #details of the user
 def profile_details(request):
     user = request.user
+    
+    referral_code=ReferralCode.objects.get(user=user)
     if request.method == 'POST':
         # Retrieve form data
         username = request.POST['username']
@@ -291,7 +319,8 @@ def profile_details(request):
         return redirect('profile_details')  # Redirect to the profile page or a success page
 
     context={
-        'user' : user
+        'user' : user,
+        'referral_code': referral_code
     }
     
     return render (request, 'profile.html', context)  
@@ -350,11 +379,10 @@ def initiate_refund(request):
     payment_id = order.payment_id
     print(payment_id)
     amount = order.total_price
-    amount = int(float(amount))
+    amount = 100
     try:
         refund = client.payment.refund(payment_id, {
             'amount': amount * 100,
-            "speed": "optimum",
         })
 
         if refund.get('id'):
@@ -370,10 +398,10 @@ def initiate_refund(request):
             return JsonResponse({'error': error_message}, status=400)
 
     except Exception as e:
-        print(payment_id)
-        # Handle any exceptions that occur during the refund process
-        return JsonResponse({'error': str(e)}, status=500)
-
+            print(payment_id)
+            # Handle any exceptions that occur during the refund process
+            error_message = 'There is an issue with the server. Please try again later.'
+            return JsonResponse({'error': str(e), 'error_message': error_message}, status=500)
     
     
 def return_order(request):
@@ -452,4 +480,39 @@ def verify_otp_for_mail(request):
             success=True
             
             return JsonResponse({'success': success})
-                   
+  
+  
+def walletpay(request):
+    total_price_str = request.POST['total_price']
+    total_price = Decimal(total_price_str)
+    print(total_price)
+    user=request.user
+    wallet=Wallet.objects.get(user=user)
+    print(wallet.money)
+    wallet.money -= total_price
+    wallet.save()
+    success=True
+    data={
+        "success" : success
+    }
+    return JsonResponse(data)     
+
+def wallet_refund(request):
+    user=request.user
+    order_id = request.POST.get('order_id')
+    print(order_id)
+    order = Order.objects.get(id=order_id)
+    total_price=order.total_price            
+    wallet=Wallet.objects.get(user=user)
+    print(wallet.money)
+    if wallet.money is None:
+        wallet.money = total_price
+    else:
+        wallet.money += total_price
+            
+    wallet.save()
+    success=True
+    data={
+        "success" : success
+    }
+    return JsonResponse(data)     

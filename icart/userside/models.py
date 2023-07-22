@@ -32,6 +32,7 @@ class Order(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('PREPAID', 'Prepaid'),
         ('COD', 'Cash on Delivery'),
+        ('WALLET', 'Wallet'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)

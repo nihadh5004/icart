@@ -19,6 +19,7 @@ def create_user_cart(sender, instance, created, **kwargs):
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     money=models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    
     def __str__(self):
         return f'{self.id} - {self.user.username}'
 
@@ -39,7 +40,7 @@ class UserWishlist(models.Model):
 @receiver(post_save, sender=User)
 def create_user_wishlist(sender, instance, created, **kwargs):
     if created:
-        Wishlist.objects.create(user=instance)
+        UserWishlist.objects.create(user=instance)
         
 
 class Wishlist(models.Model):
