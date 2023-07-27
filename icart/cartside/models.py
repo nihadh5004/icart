@@ -33,9 +33,9 @@ def create_user_wallet(sender, instance, created, **kwargs):
 
 
 class UserWishlist(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE ,  null=True, blank=True) 
     def __str__(self):
-        return f'{self.id} - {self.user.username}'
+        return f'{self.id} '
 
 @receiver(post_save, sender=User)
 def create_user_wishlist(sender, instance, created, **kwargs):

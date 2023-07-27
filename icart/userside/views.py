@@ -41,150 +41,164 @@ def checkout(request):
 
 #adding new address
 def add_address(request):
-    if request.method == "POST":
-        fullname=request.POST['fullname']
-        address=request.POST['address']
-        street=request.POST['street']
-        city=request.POST['city']
-        state=request.POST['state']
-        pincode=request.POST['pincode']
-        phone=request.POST['phone']
-        
-        user=request.user
-        Address.objects.create(user=user, fullname=fullname, address=address, street=street, city=city , state=state, pincode=pincode, contact=phone)
-        messages.success(request, 'Address adding succesfully')
-        return redirect ('checkout')
-    return render(request,'add_address.html')
+    if request.user.is_authenticated:
 
+        if request.method == "POST":
+            fullname=request.POST['fullname']
+            address=request.POST['address']
+            street=request.POST['street']
+            city=request.POST['city']
+            state=request.POST['state']
+            pincode=request.POST['pincode']
+            phone=request.POST['phone']
+            
+            user=request.user
+            Address.objects.create(user=user, fullname=fullname, address=address, street=street, city=city , state=state, pincode=pincode, contact=phone)
+            messages.success(request, 'Address adding succesfully')
+            return redirect ('checkout')
+        return render(request,'add_address.html')
+    else:
+        return redirect('signin')
 
 #editing the existing address in the checkout page
 def edit_address(request, address_id):
-    address = Address.objects.get(id=address_id)
+    if request.user.is_authenticated:
 
-    if request.method == "POST":
-        fullname = request.POST['fullname']
-        address_text = request.POST['address']
-        street = request.POST['street']
-        city = request.POST['city']
-        state = request.POST['state']
-        pincode = request.POST['pincode']
-        phone = request.POST['phone']
-        
-        address.fullname = fullname
-        address.address = address_text
-        address.street = street
-        address.city = city
-        address.state = state
-        address.pincode = pincode
-        address.contact = phone
-        address.save()
-        
-        messages.success(request, 'Address edited successfully')
-        return redirect('checkout')
-    
-    
-    context={
-        'address' : address,
-    }
-    return render(request, 'edit_address.html' , context )
+        address = Address.objects.get(id=address_id)
 
-#payment page
-def payment_page(request, address_id):
-    address = Address.objects.get(id=address_id)
-    user=request.user
-    refer_table=ReferralOffers.objects.all()
-    cart_id=UserCart.objects.get(user=user)
-    wallet=Wallet.objects.get(user=user)
-    products=Cart.objects.filter(cart_id=cart_id)
-    productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
-    total_price = productstotal['total_price']
-    discount_amount=0
-    #If the user applied any coupon
-    if cart_id.coupon:    
-        discount_price= total_price - cart_id.coupon.discount_price
+        if request.method == "POST":
+            fullname = request.POST['fullname']
+            address_text = request.POST['address']
+            street = request.POST['street']
+            city = request.POST['city']
+            state = request.POST['state']
+            pincode = request.POST['pincode']
+            phone = request.POST['phone']
+            
+            address.fullname = fullname
+            address.address = address_text
+            address.street = street
+            address.city = city
+            address.state = state
+            address.pincode = pincode
+            address.contact = phone
+            address.save()
+            
+            messages.success(request, 'Address edited successfully')
+            return redirect('checkout')
+        
+        
+        context={
+            'address' : address,
+        }
+        return render(request, 'edit_address.html' , context )
     else:
-        discount_price = total_price
+        return redirect('signin')
+
+
+def payment_page(request, address_id):
+    if request.user.is_authenticated:
+
+        address = Address.objects.get(id=address_id)
+        user=request.user
+        refer_table=ReferralOffers.objects.all()
+        cart_id=UserCart.objects.get(user=user)
+        wallet=Wallet.objects.get(user=user)
+        products=Cart.objects.filter(cart_id=cart_id)
+        productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
+        total_price = productstotal['total_price']
+        discount_amount=0
+        #If the user applied any coupon
+        if cart_id.coupon:    
+            discount_price= total_price - cart_id.coupon.discount_price
+        else:
+            discount_price = total_price
+            
+        referral_code_obj = ReferralCode.objects.get(user=user)
+        old_orders=Order.objects.filter(user=user)
+        if refer_table:
+            if referral_code_obj.referrer and not old_orders:
+                refer_discount=refer_table[0].referral_discount
+                discount_amount = min(total_price * Decimal(refer_discount) / Decimal('100'), Decimal('100'))
+                discount_price -= discount_amount
+            
         
-    referral_code_obj = ReferralCode.objects.get(user=user)
-    old_orders=Order.objects.filter(user=user)
-    if refer_table:
-        if referral_code_obj.referrer and not old_orders:
-            refer_discount=refer_table[0].referral_discount
-            discount_amount = min(total_price * Decimal(refer_discount) / Decimal('100'), Decimal('100'))
-            discount_price -= discount_amount
+        context={
+            'address': address ,
+            'total_price' : total_price ,
+            'discount_price' : discount_price ,
+            'cart_id' : cart_id ,
+            'wallet': wallet ,
+            'discount_amount' : discount_amount
+        }
         
-       
-    context={
-        'address': address ,
-        'total_price' : total_price ,
-        'discount_price' : discount_price ,
-        'cart_id' : cart_id ,
-        'wallet': wallet ,
-        'discount_amount' : discount_amount
-    }
-    
-    return render (request,'payment.html', context)
+        return render (request,'payment.html', context)
+    else:
+        return redirect('signin')
 
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 
 
 def place_order(request, address_id):
-    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    if request.user.is_authenticated:
 
-        address=Address.objects.get(id=address_id)
-        paymentMethod=request.POST.get('paymentMethod')
-        payment_id = request.POST.get('payment_id')
-        total_price=request.POST.get('total_price')
-        user=request.user
-        cart_id=UserCart.objects.get(user=user)
-        # productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price')) 
-        # total_price = productstotal['total_price']
-        # if cart_id.coupon:
-        #     total_price = productstotal['total_price'] - cart_id.coupon.discount_price
-        refer_table=ReferralOffers.objects.all()
-        referral_code_obj = ReferralCode.objects.get(user=user)
-        old_orders=Order.objects.filter(user=user)
-        if refer_table:
-            if referral_code_obj.referrer and not old_orders:    
-                referrer = referral_code_obj.referrer  # Assuming 'referrer' is the field containing the referrer user
-                referrer_wallet = Wallet.objects.get(user=referrer)
-                referrer_money=refer_table[0].referrer_amount
-                if referrer_wallet.money==None:
-                    referrer_wallet.money = referrer_money
-                else:
-                    referrer_wallet.money += referrer_money
-                referrer_wallet.save()
-   
-        order=Order.objects.create(user=user ,address=address, total_price=total_price, payment_status= 'ORDERED' ,payment_method = paymentMethod ,payment_id= payment_id  )
-        
-        cart_items=Cart.objects.filter(cart_id=cart_id)
-        
-        for product in cart_items:
-            Orderlist.objects.create(order_id=order, 
-                                    product=product.product, 
-                                    quantity=product.quantity,
-                                    price=product.price)
-            product_variant = product.product
-            product_variant.stock -= product.quantity
-            product_variant.save()
-            product.delete()
-        
-        
-        cart_id.coupon =None
-        cart_id.save()
-        
-        context={
-            'order' : order
-        }
-        
-        
-        rendered_html = render_to_string('order_confirmation.html', context)
-        
-        # Return a JSON response with the order details and the rendered HTML string
-        return JsonResponse({'order_id': order.id, 'order_total': order.total_price, 'rendered_html': rendered_html})
-        # return render (request , 'order_confirmation.html', context)
+        if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+
+            address=Address.objects.get(id=address_id)
+            paymentMethod=request.POST.get('paymentMethod')
+            payment_id = request.POST.get('payment_id')
+            total_price=request.POST.get('total_price')
+            user=request.user
+            cart_id=UserCart.objects.get(user=user)
+            # productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price')) 
+            # total_price = productstotal['total_price']
+            # if cart_id.coupon:
+            #     total_price = productstotal['total_price'] - cart_id.coupon.discount_price
+            refer_table=ReferralOffers.objects.all()
+            referral_code_obj = ReferralCode.objects.get(user=user)
+            old_orders=Order.objects.filter(user=user)
+            if refer_table:
+                if referral_code_obj.referrer and not old_orders:    
+                    referrer = referral_code_obj.referrer  # Assuming 'referrer' is the field containing the referrer user
+                    referrer_wallet = Wallet.objects.get(user=referrer)
+                    referrer_money=refer_table[0].referrer_amount
+                    if referrer_wallet.money==None:
+                        referrer_wallet.money = referrer_money
+                    else:
+                        referrer_wallet.money += referrer_money
+                    referrer_wallet.save()
     
+            order=Order.objects.create(user=user ,address=address, total_price=total_price, payment_status= 'ORDERED' ,payment_method = paymentMethod ,payment_id= payment_id  )
+            
+            cart_items=Cart.objects.filter(cart_id=cart_id)
+            
+            for product in cart_items:
+                Orderlist.objects.create(order_id=order, 
+                                        product=product.product, 
+                                        quantity=product.quantity,
+                                        price=product.price)
+                product_variant = product.product
+                product_variant.stock -= product.quantity
+                product_variant.save()
+                product.delete()
+            
+            
+            cart_id.coupon =None
+            cart_id.save()
+            
+            context={
+                'order' : order
+            }
+            
+            
+            rendered_html = render_to_string('order_confirmation.html', context)
+            
+            # Return a JSON response with the order details and the rendered HTML string
+            return JsonResponse({'order_id': order.id, 'order_total': order.total_price, 'rendered_html': rendered_html})
+            # return render (request , 'order_confirmation.html', context)
+        else:
+            return redirect('signin')
 
 
 
@@ -200,67 +214,78 @@ import razorpay
 # import hashlib
 
 def initiate_payment(request):
-    # ... Your code to handle the payment initiation ...
-    amount = request.POST.get('total_price')
-    amount = int(float(amount))
+    if request.user.is_authenticated:
 
-    # Create a new Razorpay order
-    order_amount = amount * 100  # Amount in paise (e.g., 50000 paise = ₹500)
-    order_currency = 'INR'
-    order_receipt = 'order_receipt'  # Unique order receipt identifier
-    notes = {'shipping_address': '123, Shipping Street'}
+        # ... Your code to handle the payment initiation ...
+        amount = request.POST.get('total_price')
+        amount = int(float(amount))
 
-    client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+        # Create a new Razorpay order
+        order_amount = amount * 100  # Amount in paise (e.g., 50000 paise = ₹500)
+        order_currency = 'INR'
+        order_receipt = 'order_receipt'  # Unique order receipt identifier
+        notes = {'shipping_address': '123, Shipping Street'}
 
-    razorpay_order = client.order.create(
-        {'amount': order_amount, 'currency': order_currency, 'receipt': order_receipt, 'notes': notes}
-    )
-    
-    # Retrieve the Razorpay order ID from the response
-    razorpay_order_id = razorpay_order['id']
-   
-   
-#    # Manually generate the Razorpay signature for the order
-#     signature = f"{razorpay_order_id}"  # Concatenation of order ID and payment ID
-#     secret_key = settings.RAZORPAY_API_SECRET 
-#     generated_signature = hashlib.sha256(f"{signature}".encode()).hexdigest()
-#     # Prepare the response with the Razorpay order ID and signature
-   
-    response_data = {
-        'razorpay_order_id': razorpay_order_id,
-        'amount' : order_amount ,
-        'currency' : order_currency ,
+        client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+
+        razorpay_order = client.order.create(
+            {'amount': order_amount, 'currency': order_currency, 'receipt': order_receipt, 'notes': notes}
+        )
         
-        # 'razorpay_signature': generated_signature
-    }
+        # Retrieve the Razorpay order ID from the response
+        razorpay_order_id = razorpay_order['id']
+    
+    
+    #    # Manually generate the Razorpay signature for the order
+    #     signature = f"{razorpay_order_id}"  # Concatenation of order ID and payment ID
+    #     secret_key = settings.RAZORPAY_API_SECRET 
+    #     generated_signature = hashlib.sha256(f"{signature}".encode()).hexdigest()
+    #     # Prepare the response with the Razorpay order ID and signature
+    
+        response_data = {
+            'razorpay_order_id': razorpay_order_id,
+            'amount' : order_amount ,
+            'currency' : order_currency ,
+            
+            # 'razorpay_signature': generated_signature
+        }
 
-    # Return the response as JSON
-    return JsonResponse(response_data)
+        # Return the response as JSON
+        return JsonResponse(response_data)
+    else:
+        return redirect('signin')
 
     
 #order conftirmation page
 def order_confirmation(request, order_id):
-    order=Order.objects.get(id=order_id)
-    context={
-            'order' : order
-        }
-    return render (request,'order_confirmation.html' , context)
+    if request.user.is_authenticated:
+
+        order=Order.objects.get(id=order_id)
+        context={
+                'order' : order
+            }
+        return render (request,'order_confirmation.html' , context)
+    else:
+        return redirect('signin')
  
 #list of the orders user has done
 def my_orders(request):
-    user=request.user
-    orders=Order.objects.filter(user=user).order_by('-id')
-    
-    
-    paginator = Paginator(orders, 8) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    if request.user.is_authenticated:
+        user=request.user
+        orders=Order.objects.filter(user=user).order_by('-id')
+        
+        
+        paginator = Paginator(orders, 8) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-    context={
-       'orders': page_obj 
-    }
+        context={
+        'orders': page_obj 
+        }
 
-    return render (request, 'my_orders.html' , context )
+        return render (request, 'my_orders.html' , context )
+    else:
+        return redirect('signin')
 
 #cancelling the order        
 
@@ -285,21 +310,28 @@ def cancel_order(request):
 
 #deatils of the order and list of items in the order
 def user_order_detail(request, order_id):
-    order=Order.objects.get(id=order_id)
-    
-    context={
-       'order': order 
-    }
-    return render(request, 'order_detail.html', context)
+    if request.user.is_authenticated:
+        order=Order.objects.get(id=order_id)
+        
+        context={
+        'order': order 
+        }
+        return render(request, 'order_detail.html', context)
+    else:
+        return redirect('signin')
    
     
 def address(request):
-    user=request.user
-    addresses=Address.objects.filter(user=user)
-    context={
-        'addresses' : addresses
-    }
-    return render (request, 'address.html', context)
+    if request.user.is_authenticated:
+
+        user=request.user
+        addresses=Address.objects.filter(user=user)
+        context={
+            'addresses' : addresses
+        }
+        return render (request, 'address.html', context)
+    else:
+        return redirect('signin')
 
 from authentication.models import ReferralCode
 #details of the user
@@ -361,46 +393,52 @@ def profile_details(request):
     return render (request, 'profile.html', context)  
 
 def profile_add_address(request):
-    if request.method == "POST":
-        fullname=request.POST['fullname']
-        address=request.POST['address']
-        street=request.POST['street']
-        city=request.POST['city']
-        state=request.POST['state']
-        pincode=request.POST['pincode']
-        phone=request.POST['phone']
-        
-        user=request.user
-        Address.objects.create(user=user, fullname=fullname, address=address, street=street, city=city , state=state, pincode=pincode, contact=phone)
-        messages.success(request, 'Address added succesfully')
-        return redirect ('address')
-    return render(request,'profile_add_address.html')
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            fullname=request.POST['fullname']
+            address=request.POST['address']
+            street=request.POST['street']
+            city=request.POST['city']
+            state=request.POST['state']
+            pincode=request.POST['pincode']
+            phone=request.POST['phone']
+            
+            user=request.user
+            Address.objects.create(user=user, fullname=fullname, address=address, street=street, city=city , state=state, pincode=pincode, contact=phone)
+            messages.success(request, 'Address added succesfully')
+            return redirect ('address')
+        return render(request,'profile_add_address.html')
+    else:
+        return redirect('signin')
 
 
 from django.contrib.auth import authenticate, login
 
 def change_password(request, user_id):
-    user = User.objects.get(id=user_id)
-    
-    if request.method == 'POST':
-        pass1 = request.POST['pass1']
-        pass2 = request.POST['pass2']
+    if request.user.is_authenticated:
+        user = User.objects.get(id=user_id)
         
-        if pass1 == pass2:
-            user.set_password(pass1)
-            user.save()
+        if request.method == 'POST':
+            pass1 = request.POST['pass1']
+            pass2 = request.POST['pass2']
             
-            # Reauthenticate the user with updated credentials
-            updated_user = authenticate(request, username=user.username, password=pass1)
-            if updated_user is not None:
-                login(request, updated_user)
-            
-            return redirect('profile_details')
-        else:
-            messages.error(request, 'Passwords do not match')
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    
-    return render(request, 'change_password.html', {'user': user})
+            if pass1 == pass2:
+                user.set_password(pass1)
+                user.save()
+                
+                # Reauthenticate the user with updated credentials
+                updated_user = authenticate(request, username=user.username, password=pass1)
+                if updated_user is not None:
+                    login(request, updated_user)
+                
+                return redirect('profile_details')
+            else:
+                messages.error(request, 'Passwords do not match')
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
+        return render(request, 'change_password.html', {'user': user})
+    else:
+        return redirect('signin')
 
 
 
@@ -439,14 +477,17 @@ def initiate_refund(request):
             return JsonResponse({'error': str(e), 'error_message': error_message}, status=500)
     
 def initiate_return(request):
-    order_id = request.POST.get('order_id')
-    order = Order.objects.get(id=order_id)
-    order.payment_status = 'PENDING'
-    order.save() 
-    data={
-        "payment_status" : order.payment_status
-    }
-    return JsonResponse(data)   
+    if request.user.is_authenticated:
+        order_id = request.POST.get('order_id')
+        order = Order.objects.get(id=order_id)
+        order.payment_status = 'PENDING'
+        order.save() 
+        data={
+            "payment_status" : order.payment_status
+        }
+        return JsonResponse(data)   
+    else:
+        return redirect('signin')
 
 def return_order(request):
     try:
@@ -484,14 +525,17 @@ def return_order(request):
     
     
 def wallet(request):
-    user=request.user
-    wallet=Wallet.objects.get(user=user)
-    
-    context={
-        "wallet" : wallet 
-    }
-    
-    return render(request, 'wallet.html' , context)
+    if request.user.is_authenticated:
+        user=request.user
+        wallet=Wallet.objects.get(user=user)
+        
+        context={
+            "wallet" : wallet 
+        }
+        
+        return render(request, 'wallet.html' , context)
+    else:
+        return redirect('signin')
 
 import random
 from django.core.mail import send_mail , EmailMessage
@@ -527,39 +571,45 @@ def verify_otp_for_mail(request):
   
   
 def walletpay(request):
-    total_price_str = request.POST['total_price']
-    total_price = Decimal(total_price_str)
-    print(total_price)
-    user=request.user
-    wallet=Wallet.objects.get(user=user)
-    print(wallet.money)
-    wallet.money -= total_price
-    wallet.save()
-    success=True
-    data={
-        "success" : success
-    }
-    return JsonResponse(data)     
+    if request.user.is_authenticated:
+        total_price_str = request.POST['total_price']
+        total_price = Decimal(total_price_str)
+        print(total_price)
+        user=request.user
+        wallet=Wallet.objects.get(user=user)
+        print(wallet.money)
+        wallet.money -= total_price
+        wallet.save()
+        success=True
+        data={
+            "success" : success
+        }
+        return JsonResponse(data) 
+    else:
+        return redirect('signin')    
 
 def wallet_refund(request):
-    user=request.user
-    order_id = request.POST.get('order_id')
-    print(order_id)
-    order = Order.objects.get(id=order_id)
-    total_price=order.total_price            
-    wallet=Wallet.objects.get(user=user)
-    print(wallet.money)
-    if wallet.money is None:
-        wallet.money = total_price
+    if request.user.is_authenticated:
+        user=request.user
+        order_id = request.POST.get('order_id')
+        print(order_id)
+        order = Order.objects.get(id=order_id)
+        total_price=order.total_price            
+        wallet=Wallet.objects.get(user=user)
+        print(wallet.money)
+        if wallet.money is None:
+            wallet.money = total_price
+        else:
+            wallet.money += total_price
+                
+        wallet.save()
+        success=True
+        data={
+            "success" : success
+        }
+        return JsonResponse(data)     
     else:
-        wallet.money += total_price
-            
-    wallet.save()
-    success=True
-    data={
-        "success" : success
-    }
-    return JsonResponse(data)     
+        return redirect('signin')
 
 
 

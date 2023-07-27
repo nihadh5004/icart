@@ -86,7 +86,10 @@ def product_detail(request, slug):
         wishlist_items = UserWishlist.objects.get(user=request.user)  # Assuming you have a related name 'wishlist_items' for the wishlist relationship in the UserProfile model
         is_in_wishlist = Wishlist.objects.filter(wishlist_id=wishlist_items, product=productvariant).exists()
     else:
-        is_in_wishlist=None
+        wishlist_id=request.session.get('wishlist_id')
+        wishlist_items = UserWishlist.objects.get(id=wishlist_id)  
+        is_in_wishlist = Wishlist.objects.filter(wishlist_id=wishlist_items, product=productvariant).exists()
+
     context={
         'product': product, 
         'related_products': related_products ,

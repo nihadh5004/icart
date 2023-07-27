@@ -58,9 +58,9 @@
             <span id="date"></span>
         </div>
         
-        <form action="{% url '_admin_dashboard' %}" method="get" class="form-container">
+        <form action="{% url '_admin_dashboard' %}" method="get" class="form-container"  onsubmit="return validateForm()">
             <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" value="{{start_date}}" >
+            <input type="date" id="start_date" name="start_date" value="{{start_date}}"  onchange="setMinEndDate()">
           
             <label for="end_date">End Date:</label>
             <input type="date" id="end_date" name="end_date" value="{{end_date}}" >
@@ -310,7 +310,22 @@
         });
     });
 </script>
-
+<script>
+    function validateForm() {
+      const startDateInput = document.getElementById("start_date");
+      const endDateInput = document.getElementById("end_date");
+      
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      
+      if (endDate < startDate) {
+        alert("End date must be greater than the start date.");
+        return false; // Prevent form submission
+      }
+      
+      return true; // Allow form submission
+    }
+  </script>
 <script>
    
    

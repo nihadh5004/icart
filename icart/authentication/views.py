@@ -22,11 +22,11 @@ import random
 from .models import Slider
 from productside.models import *
 from django.views.decorators.cache import cache_control
-
+from django.http import HttpResponseRedirect
+from cartside.models import *
 # Create your views here.
 from django.db.models import F
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def home(request):
   
    
@@ -42,7 +42,6 @@ def home(request):
     
     return render(request, 'home.html', context)
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signin(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -92,7 +91,6 @@ def verify_otp(request,user_for_otp):
             messages.error(request,'invalid otp')
             return redirect('signin')
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signup(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -150,7 +148,7 @@ def signup(request):
     
     return render(request,'authentication/signup.html')
     
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)    
+
 def activate(request,uidb64,token):
     try:
         uid=force_str(urlsafe_base64_decode(uidb64))
@@ -173,7 +171,8 @@ def activate(request,uidb64,token):
             myuser.delete()
 
         return render(request, 'authentication/verification_failed.html')
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
+
 def signout(request):
     if request.user.is_authenticated:
         logout(request)
@@ -184,7 +183,6 @@ def signout(request):
 from twilio.rest import Client
 from django.conf import settings
 from django.http import HttpResponse
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def send_otp(phone_number):
     # Generate the OTP
     otp = '645736'  # Implement your OTP generation logic here
@@ -203,10 +201,8 @@ def send_otp(phone_number):
 
 
 
-from django.http import HttpResponseRedirect
 
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reset_password(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -241,7 +237,6 @@ def reset_password(request):
 
     return render(request, 'authentication/reset_password.html')
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def res_pass(request,uidb64,token):
     try:
         uid=force_str(urlsafe_base64_decode(uidb64))
@@ -252,7 +247,6 @@ def res_pass(request,uidb64,token):
     if myuser is not None and generate_token.check_token(myuser,token):
         return render(request,'authentication/new_password.html' ,{'user': myuser})
    
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)     
 def update_password(request, user_id):
     if request.method =='POST':
         pass1=request.POST['pass1']
@@ -269,7 +263,6 @@ def update_password(request, user_id):
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
   
   
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guest_signin(request):
     
     if request.method=='POST':
@@ -303,9 +296,7 @@ def guest_signin(request):
         
     return render(request, 'authentication/signin.html')
 
-from cartside.models import *
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guest_verify_otp(request,user_for_otp):
     
     if request.method=='POST':
@@ -313,6 +304,8 @@ def guest_verify_otp(request,user_for_otp):
         generated_otp=request.session.get('otp')
         cart=request.session.get('cart_id')
         guest_cart_id=UserCart.objects.get(id=cart)
+        wishlist=request.session.get('wishlist_id')
+        guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
 
         #checking the otp entered is same as send to the email
         if otp==generated_otp:
@@ -337,11 +330,10 @@ def guest_verify_otp(request,user_for_otp):
             del request.session['otp']
             guest_cart_id.delete()
             del request.session['cart_id']
+            guest_wishlist_id.delete()
+            del request.session['wishlist_id']
             return redirect('cart')
         else:
             messages.error(request,'invalid otp')
             return redirect('signin')
-        
-        
-def o(request):
-    return render(request, 'authentication/otp_verification.html')
+         

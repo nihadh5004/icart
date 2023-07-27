@@ -12,7 +12,6 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 
-# from productside.forms import ProductForm
 
 # Create your views here.
 
@@ -28,39 +27,47 @@ from django.template import RequestContext
 from xhtml2pdf import pisa
 from authentication.models import *
 
-
-def download_template(request):
-    # Replace 'download_template.html' with the path to your HTML template file
-    template_name = 'admin/download_template.html'
-
-    # Get the JSON data from the request parameters
-    json_data = request.GET.get('json_data', '{}')
-    context_data = json.loads(json_data)
-
-    # Render the HTML template with the parsed context data
-    rendered_template = render_to_string(template_name, {'context_data': context_data})
-
-    # Create a PDF response
-    pdf_response = HttpResponse(content_type='application/pdf')
-    pdf_response['Content-Disposition'] = 'attachment; filename="ICART_SALES_REPORT.pdf"'
-
-    # Generate the PDF from the HTML content
-    pisa_status = pisa.CreatePDF(
-        src=rendered_template,
-        dest=pdf_response,
-    )
-
-    # Check if PDF generation was successful
-    if pisa_status.err:
-        return HttpResponse('PDF generation failed', status=500)
-
-    return pdf_response
-
 import json
 from django.core.serializers import serialize
 from django.db.models.query import QuerySet
 from django.http import JsonResponse
 import decimal
+
+
+#function to download sales report
+def download_template(request):
+    if request.user.is_authenticated and request.user.is_superuser: 
+        # Replace 'download_template.html' with the path to your HTML template file
+        template_name = 'admin/download_template.html'
+
+        # Get the JSON data from the request parameters
+        json_data = request.GET.get('json_data', '{}')
+        context_data = json.loads(json_data)
+
+        # Render the HTML template with the parsed context data
+        rendered_template = render_to_string(template_name, {'context_data': context_data})
+
+        # Create a PDF response
+        pdf_response = HttpResponse(content_type='application/pdf')
+        pdf_response['Content-Disposition'] = 'attachment; filename="ICART_SALES_REPORT.pdf"'
+
+        # Generate the PDF from the HTML content
+        pisa_status = pisa.CreatePDF(
+            src=rendered_template,
+            dest=pdf_response,
+        )
+
+        # Check if PDF generation was successful
+        if pisa_status.err:
+            return HttpResponse('PDF generation failed', status=500)
+
+        return pdf_response
+    else:
+        return redirect('_admin_signin')
+
+
+
+# Encoding the context of dashboard to json file and dumbing it to print salesreport.pdf
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, QuerySet):
@@ -74,8 +81,9 @@ class CustomJSONEncoder(json.JSONEncoder):
         else:
             return super().default(obj)
 
+
+
 #  dashboard function of the admin 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def _admin_dashboard(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
@@ -195,8 +203,8 @@ def _admin_dashboard(request):
     else:
         return redirect('_admin_signin')
 
-# signin function for the admin 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
+
 def _admin_signin(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
@@ -216,489 +224,568 @@ def _admin_signin(request):
     return render (request, 'admin/admin_signin.html')
 
 
-# Signout function for the admin
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def admin_signout(request):
     if request.user.is_authenticated:
         logout(request)
         return redirect('_admin_signin')
 
 
-# Function for listing the total users in admin side
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def userlist(request):
-    
-    #Retreiving all users from the user table according to the date they has joined.
-    users=User.objects.all().order_by('date_joined')
-     # Show  orders per page
-    paginator = Paginator(users, 10) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context={
-        'users': page_obj
-    }
-    return render (request, 'admin/userlist.html', context)
+    if request.user.is_authenticated and request.user.is_superuser:  
+        #Retreiving all users from the user table according to the date they has joined.
+        users=User.objects.all().order_by('date_joined')
+        # Show  orders per page
+        paginator = Paginator(users, 10) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context={
+            'users': page_obj
+        }
+        return render (request, 'admin/userlist.html', context)
+    else:
+        return redirect('_admin_signin')
 
 
-#Function to block the user which leads to reject the access from the website.
+
 def block_user(request, user_id):
-    
-    #Retreiving the user detail according to the argument that has passed to the function 
-    user = get_object_or_404(User, id=user_id)
-    user.is_active = False
-    user.save()
-    return redirect('userlist')  
+    if request.user.is_authenticated and request.user.is_superuser: 
+        #Retreiving the user detail according to the argument that has passed to the function 
+        user = get_object_or_404(User, id=user_id)
+        user.is_active = False
+        user.save()
+        return redirect('userlist')  
+    else:
+        return redirect('_admin_signin')
 
 
-# Function unblock the user who has been blocked.
+
+
 def unblock_user(request, user_id):
-    
-    #Retreiving the user detail according to the argument that has passed to the function 
-    user = get_object_or_404(User, id=user_id)
-    user.is_active = True
-    user.save()
-    return redirect('userlist') 
+    if request.user.is_authenticated and request.user.is_superuser: 
+        #Retreiving the user detail according to the argument that has passed to the function 
+        user = get_object_or_404(User, id=user_id)
+        user.is_active = True
+        user.save()
+        return redirect('userlist') 
+    else:
+        return redirect('_admin_signin')
 
 
 
-# Function to list the categories in the website.
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def categorylist(request):
-    
-    #Retreiving the category name and the number of the products present in that category.
-    product_counts = Categories.objects.annotate(product_count=Count('product')).order_by('id')
-    context={
-        'product_counts': product_counts
-    }
-    return render (request, 'admin/categorylist.html', context)
+   if request.user.is_authenticated and request.user.is_superuser: 
+        #Retreiving the category name and the number of the products present in that category.
+        product_counts = Categories.objects.annotate(product_count=Count('product')).order_by('id')
+        context={
+            'product_counts': product_counts
+        }
+        return render (request, 'admin/categorylist.html', context)
+   else:
+       return redirect('_admin_signin')
 
 
-# Function to create new categories from the admin side.
+
 def create_category(request):
-    if request.method == 'POST':
-        # Retrieve the category name from the form data
-        category_name = request.POST['category_name']
-        
-        # Create a new category object
-        category = Categories(category_name=category_name)
-        
-        # Save the category to the database
-        category.save()
-        
-        
-        return redirect('categorylist')  
-        
-    return render(request, 'admin/create_category.html')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        if request.method == 'POST':
+            # Retrieve the category name from the form data
+            category_name = request.POST['category_name']
+            
+            # Create a new category object
+            category = Categories(category_name=category_name)
+            
+            # Save the category to the database
+            category.save()
+            
+            
+            return redirect('categorylist')  
+        return render(request, 'admin/create_category.html')
+    else:
+        return redirect('_admin_signin')
 
 
-# Function to list the products in the admin side
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def productlist(request):
-    
-    #Retreiving the total products from the products table based on descending order they has created.
-    products=Product.objects.all().order_by('-id')
-     # Show  orders per page
-    paginator = Paginator(products, 10) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context={
-        'products': page_obj
-    }
-    return render(request,'admin/productlist.html', context)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        #Retreiving the total products from the products table based on descending order they has created.
+        products=Product.objects.all().order_by('-id')
+        # Show  orders per page
+        paginator = Paginator(products, 10) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context={
+            'products': page_obj
+        }
+        return render(request,'admin/productlist.html', context)
+    else:
+        return redirect('_admin_signin')
  
     
-# Deleting the product from the website, still it will be in the database  
+
 def softdelete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    product.is_active = False
-    product.save()
-    return redirect('productlist') 
+    if request.user.is_authenticated and request.user.is_superuser: 
+        product = get_object_or_404(Product, id=product_id)
+        product.is_active = False
+        product.save()
+        return redirect('productlist') 
+    else:
+        return redirect('_admin_signin')
 
 
-# Undoing the deletion of the product.
+
+
 def undo_softdelete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    product.is_active = True
-    product.save()
-    return redirect('productlist') 
+    if request.user.is_authenticated and request.user.is_superuser: 
+        product = get_object_or_404(Product, id=product_id)
+        product.is_active = True
+        product.save()
+        return redirect('productlist') 
+    else:
+        return redirect ('_admin_signin')
+
 
 def pending_orders(request):
-    orders=Order.objects.filter(payment_status="PENDING").order_by('-id')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        orders=Order.objects.filter(payment_status="PENDING").order_by('-id')
 
-    context={
-        'orders' : orders
-    }
-    
-    return render (request, 'admin/pendinglist.html' , context)
-
-# Listing the total orders in th admin side.
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def orderlist(request):
-    orders=Order.objects.all().order_by('-id')
-     # Show  orders per page
-    paginator = Paginator(orders, 10) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context={
-        'orders' : page_obj,
+        context={
+            'orders' : orders
+        }
         
-    }
-    
-    return render (request, 'admin/orderlist.html' , context)
+        return render (request, 'admin/pendinglist.html' , context)
+    else:
+        return redirect('_admin_signin')
 
-#Details of the selected order and the products that has ordered in that order.
+
+
+def orderlist(request):
+    if request.user.is_authenticated and request.user.is_superuser: 
+        orders=Order.objects.all().order_by('-id')
+        # Show  orders per page
+        paginator = Paginator(orders, 10) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context={
+            'orders' : page_obj,
+            
+        }
+        
+        return render (request, 'admin/orderlist.html' , context)
+    else:
+        return redirect('_admin_signin')
+
+
+#Details of each orders
 def order_details(request, order_id):
-    order=Order.objects.get(id=order_id)
-    context={
-        'order' : order
-    }
+    if request.user.is_authenticated and request.user.is_superuser: 
+        order=Order.objects.get(id=order_id)
+        context={
+            'order' : order
+        }
+        
+        return render (request, 'admin/order_details.html', context)
     
-    return render (request, 'admin/order_details.html', context)
- 
-# Function to ship the orders  from adminside 
+    else:
+        return redirect('_admin_signin')
+
+# Function to update the order status from adminside 
 def update_order(request):
-    order_id = request.POST['order_id']
-    payment_status = request.POST['payment_status']
-    order = get_object_or_404(Order, id=order_id)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        order_id = request.POST['order_id']
+        payment_status = request.POST['payment_status']
+        order = get_object_or_404(Order, id=order_id)
 
-    # Update the payment status to "Shipped"
-    order.payment_status = payment_status
-    order.save()
+        # Update the payment status to "Shipped"
+        order.payment_status = payment_status
+        order.save()
 
-    response_data = {'message': 'Order Status  Updated successfully'}
+        response_data = {'message': 'Order Status  Updated successfully'}
 
-    return JsonResponse(response_data)
+        return JsonResponse(response_data)
+    return redirect ('_admin_signin')
+
+
 #Function to cancel order from adminside.
 def reject_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        order = get_object_or_404(Order, id=order_id)
 
-    # Update the payment status to "Rejected"
-    order.payment_status = "CANCELLED"
-    order.save()
+        # Update the payment status to "Rejected"
+        order.payment_status = "CANCELLED"
+        order.save()
 
-    return redirect('orderlist')
+        return redirect('orderlist')
+    else:
+        return redirect('_admin_signin')
 
 
-#Listing the variants of a product and the details and images
 def productvariantlist(request, product_id):
-    product=Product.objects.get(id=product_id)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        product=Product.objects.get(id=product_id)
+        
+        variants=ProductVariant.objects.filter(product=product)
+        context={
+            'variants' : variants,
+            'product' : product
+        }
     
-    variants=ProductVariant.objects.filter(product=product)
-    context={
-        'variants' : variants,
-        'product' : product
-    }
-   
-    return render (request , 'admin/productvariantlist.html' , context)
+        return render (request , 'admin/productvariantlist.html' , context)
+    else:
+        return redirect('_admin_signin')
 
 from django.utils.text import slugify
 
 
-#Function to add a new product
 def add_product(request):
-    if request.method == 'POST':
-        product_name = request.POST.get('product_name')
-        category_id = request.POST.get('category')
-        description = request.POST.get('description')
-        stock = request.POST.get('stock')
-        price = request.POST.get('price')
-        storage = request.POST.get('storage')
-        color = request.POST.get('color')
-        display_image = request.FILES.get('display_image')
-        images = request.FILES.getlist('images')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        if request.method == 'POST':
+            product_name = request.POST.get('product_name')
+            category_id = request.POST.get('category')
+            description = request.POST.get('description')
+            stock = request.POST.get('stock')
+            price = request.POST.get('price')
+            storage = request.POST.get('storage')
+            color = request.POST.get('color')
+            display_image = request.FILES.get('display_image')
+            images = request.FILES.getlist('images')
 
-        # Create the product
-        category = Categories.objects.get(id=category_id)
-        product = Product.objects.create(name=product_name, description=description, category=category)
-        
-        # Create the product variant
-        storage_obj = Storage.objects.get(storage=storage)
-        color_obj = Color.objects.get(color=color)
-        variant = ProductVariant.objects.create(
-            product=product,
-            color=color_obj,
-            storage=storage_obj,
-            price=price,
-            stock=stock,
-            displayimage=display_image
-        )
+            # Create the product
+            category = Categories.objects.get(id=category_id)
+            product = Product.objects.create(name=product_name, description=description, category=category)
+            
+            # Create the product variant
+            storage_obj = Storage.objects.get(storage=storage)
+            color_obj = Color.objects.get(color=color)
+            variant = ProductVariant.objects.create(
+                product=product,
+                color=color_obj,
+                storage=storage_obj,
+                price=price,
+                stock=stock,
+                displayimage=display_image
+            )
 
-        # Create product images
-        for image in images:
-            ProductImage.objects.create(product=variant, image=image)
+            # Create product images
+            for image in images:
+                ProductImage.objects.create(product=variant, image=image)
 
-        return redirect('productlist')
+            return redirect('productlist')
+        else:
+            categories = Categories.objects.all()
+            storage_options = Storage.objects.all()
+            colours = Color.objects.all()
+            context = {
+                'categories': categories,
+                'storage_options': storage_options,
+                'colours': colours
+            }
+            return render(request, 'admin/add_product.html', context)
     else:
-        categories = Categories.objects.all()
+        return redirect('_admin_signin')
+    
+def add_variant(request, product_id):
+    if request.user.is_authenticated and request.user.is_superuser: 
+        product=Product.objects.get(id=product_id)
+
+        if request.method == 'POST':
+            stock = request.POST.get('stock')
+            price = request.POST.get('price')
+            discount = request.POST.get('discount')
+            storage = request.POST.get('storage')
+            color = request.POST.get('color')
+            display_image = request.FILES.get('display_image')
+            images = request.FILES.getlist('images')
+            
+            storage_obj = Storage.objects.get(storage=storage)
+            color_obj = Color.objects.get(color=color)
+            if price  and  discount  :
+                # Validate discount value
+                try:
+                    discount = int(discount)
+                    if discount < 0 or discount > 100:
+                        raise ValueError("Discount must be a value between 0 and 100.")
+                except ValueError:
+                    messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                
+                discount_price = float(price) - float(price) * (float(discount) / float(100))
+            else:
+                discount_price = None
+                discount=None
+            variant = ProductVariant.objects.create(
+                product=product,
+                color=color_obj,
+                storage=storage_obj,
+                price=price,
+                discount=discount,
+                discount_price=discount_price,
+                stock=stock,
+                displayimage=display_image
+            )
+        
+            for image in images:
+                ProductImage.objects.create(product=variant, image=image)
+
+            return redirect('productvariantlist' ,product_id=product.id )
+        
         storage_options = Storage.objects.all()
         colours = Color.objects.all()
         context = {
-            'categories': categories,
-            'storage_options': storage_options,
-            'colours': colours
-        }
-        return render(request, 'admin/add_product.html', context)
-    
-# Function to add a new variant to existing product   
-def add_variant(request, product_id):
-    product=Product.objects.get(id=product_id)
-
-    if request.method == 'POST':
-        stock = request.POST.get('stock')
-        price = request.POST.get('price')
-        discount = request.POST.get('discount')
-        storage = request.POST.get('storage')
-        color = request.POST.get('color')
-        display_image = request.FILES.get('display_image')
-        images = request.FILES.getlist('images')
-         
-        storage_obj = Storage.objects.get(storage=storage)
-        color_obj = Color.objects.get(color=color)
-        if price  and  discount  :
-            # Validate discount value
-            try:
-                discount = int(discount)
-                if discount < 0 or discount > 100:
-                    raise ValueError("Discount must be a value between 0 and 100.")
-            except ValueError:
-                messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-            
-            discount_price = float(price) - float(price) * (float(discount) / float(100))
-        else:
-            discount_price = None
-            discount=None
-        variant = ProductVariant.objects.create(
-            product=product,
-            color=color_obj,
-            storage=storage_obj,
-            price=price,
-            discount=discount,
-            discount_price=discount_price,
-            stock=stock,
-            displayimage=display_image
-        )
-    
-        for image in images:
-            ProductImage.objects.create(product=variant, image=image)
-
-        return redirect('productvariantlist' ,product_id=product.id )
-    
-    storage_options = Storage.objects.all()
-    colours = Color.objects.all()
-    context = {
-            'product' : product ,
-            'storage_options': storage_options,
-            'colours': colours
-        }
-    return render(request, 'admin/add_variant.html' ,context)
+                'product' : product ,
+                'storage_options': storage_options,
+                'colours': colours
+            }
+        return render(request, 'admin/add_variant.html' ,context)
+    else:
+        return redirect ('_admin_signin')
 
 
-#Function to edit the variant details and images.
 def edit_variant(request, variant_id):
-    variant = get_object_or_404(ProductVariant, id=variant_id)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        variant = get_object_or_404(ProductVariant, id=variant_id)
 
-    if request.method == 'POST':
-        stock = request.POST.get('stock')
-        price = request.POST.get('price')
-        discount = request.POST.get('discount')
-        display_image = request.FILES.get('display_image')
-        images = request.FILES.getlist('images')
+        if request.method == 'POST':
+            stock = request.POST.get('stock')
+            price = request.POST.get('price')
+            discount = request.POST.get('discount')
+            display_image = request.FILES.get('display_image')
+            images = request.FILES.getlist('images')
 
-        
-        
-        # Update stock and price if provided
-        if stock:
-            variant.stock = stock
-        if price:
-            variant.price = price
-        if  discount :
-            # Validate discount value
-            try:
-                discount=int(discount)
-                if discount < 0 or discount > 100:
-                    raise ValueError("Discount must be a value between 0 and 100.")
-            except ValueError:
-                messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            
+            
+            # Update stock and price if provided
+            if stock:
+                variant.stock = stock
+            if price:
+                variant.price = price
+            if  discount :
+                # Validate discount value
+                try:
+                    discount=int(discount)
+                    if discount < 0 or discount > 100:
+                        raise ValueError("Discount must be a value between 0 and 100.")
+                except ValueError:
+                    messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-            discount_price = float(variant.price) - float(variant.price) * (float(discount) / float(100))
-            variant.discount=discount
-            variant.discount_price=discount_price
-        # Update display image if provided
-        if display_image:
-            variant.displayimage = display_image
+                discount_price = float(variant.price) - float(variant.price) * (float(discount) / float(100))
+                variant.discount=discount
+                variant.discount_price=discount_price
+            # Update display image if provided
+            if display_image:
+                variant.displayimage = display_image
 
-        # Add additional images if provided
-        for image in images:
-            variant.productimage_set.create(image=image)
+            # Add additional images if provided
+            for image in images:
+                variant.productimage_set.create(image=image)
 
-        # Save the changes
-        variant.save()
+            # Save the changes
+            variant.save()
 
-        return redirect('productvariantlist', variant.product.id)
+            return redirect('productvariantlist', variant.product.id)
 
-    context = {'variant': variant}
-    return render(request, 'admin/update_stock.html', context)
+        context = {'variant': variant}
+        return render(request, 'admin/update_stock.html', context)
+    else:
+        return redirect('_admin_signin')
 
-#function to delete the existing images of variants.
 def delete_product_image(request,product_image_id):
-    product_image = get_object_or_404(ProductImage, id=product_image_id)
-    product=product_image.product.product.id
-    product_image.delete()
-    
-    return redirect('productvariantlist' ,product_id=product)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        product_image = get_object_or_404(ProductImage, id=product_image_id)
+        product=product_image.product.product.id
+        product_image.delete()
+        
+        return redirect('productvariantlist' ,product_id=product)
+    else:
+        return redirect('_admin_signin')
 
 
 def couponlist(request):
-    coupons=Coupon.objects.all()
-    context={
-        "coupons" : coupons
-    }
-    return render (request, 'admin/couponlist.html', context)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        coupons=Coupon.objects.all()
+        context={
+            "coupons" : coupons
+        }
+        return render (request, 'admin/couponlist.html', context)
+    else:
+        return redirect('_admin_signin')
 
 def create_coupon(request):
-    if request.method == 'POST':
-        # Retrieve the category name from the form data
-        coupon_name = request.POST['coupon_name']
-        discount_price = request.POST['discount_price']
-        minimum_amount = request.POST['minimum_amount']
-        
-       # Check if a coupon with the same name already exists
-        if Coupon.objects.filter(coupon_code=coupon_name).exists():
-            messages.error(request, 'Coupon with this name already exists.')
-            return redirect('couponlist')
-        else:
-            # Create the coupon if it doesn't already exist
-            Coupon.objects.create(coupon_code=coupon_name, discount_price=discount_price, minimum_amount=minimum_amount)
-            messages.success(request, 'Coupon created successfully.')
-            return redirect('couponlist')
-        
-    return render(request, 'admin/create_coupon.html')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        if request.method == 'POST':
+            # Retrieve the category name from the form data
+            coupon_name = request.POST['coupon_name']
+            discount_price = request.POST['discount_price']
+            minimum_amount = request.POST['minimum_amount']
+            
+        # Check if a coupon with the same name already exists
+            if Coupon.objects.filter(coupon_code=coupon_name).exists():
+                messages.error(request, 'Coupon with this name already exists.')
+                return redirect('couponlist')
+            else:
+                # Create the coupon if it doesn't already exist
+                Coupon.objects.create(coupon_code=coupon_name, discount_price=discount_price, minimum_amount=minimum_amount)
+                messages.success(request, 'Coupon created successfully.')
+                return redirect('couponlist')
+            
+        return render(request, 'admin/create_coupon.html')
+    else:
+        return redirect('_admin_signin')
 
 def disable_coupon(request, coupon_id):
-    coupon=Coupon.objects.get(id=coupon_id)
-    coupon.is_expired = True
-    coupon.save()
-    return redirect('couponlist')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        coupon=Coupon.objects.get(id=coupon_id)
+        coupon.is_expired = True
+        coupon.save()
+        return redirect('couponlist')
+    else:
+        return redirect('_admin_signin')
 
 def enable_coupon(request, coupon_id):
-    coupon=Coupon.objects.get(id=coupon_id)
-    coupon.is_expired = False
-    coupon.save()
-    return redirect('couponlist')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        coupon=Coupon.objects.get(id=coupon_id)
+        coupon.is_expired = False
+        coupon.save()
+        return redirect('couponlist')
+    else:
+        return redirect ('_admin_signin')
 
 def edit_coupon(request,coupon_id):
-    coupon=Coupon.objects.get(id=coupon_id)
-    if request.method == 'POST':
-        # Retrieve the category name from the form data
-        coupon_name = request.POST['coupon_name']
-        discount_price = request.POST['discount_price']
-        minimum_amount = request.POST['minimum_amount']
-        
-        coupon.coupon_code=coupon_name
-        coupon.discount_price=discount_price
-        coupon.minimum_amount=minimum_amount
-        coupon.save()
-        
-        return redirect('couponlist')  
-    context={
-        'coupon': coupon
-    }    
-    return render(request, 'admin/edit_coupon.html', context)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        coupon=Coupon.objects.get(id=coupon_id)
+        if request.method == 'POST':
+            # Retrieve the category name from the form data
+            coupon_name = request.POST['coupon_name']
+            discount_price = request.POST['discount_price']
+            minimum_amount = request.POST['minimum_amount']
+            
+            coupon.coupon_code=coupon_name
+            coupon.discount_price=discount_price
+            coupon.minimum_amount=minimum_amount
+            coupon.save()
+            
+            return redirect('couponlist')  
+        context={
+            'coupon': coupon
+        }    
+        return render(request, 'admin/edit_coupon.html', context)
+    else:
+        return redirect('_admin_signin')
 
 
 def referral(request):
-    refer=ReferralOffers.objects.all().order_by('-id')
-    if refer:
-        referrer_amount=refer[0].referrer_amount
-        referral_discount=refer[0].referral_discount
-        referral_description=refer[0].referral_description    
-        
-        context={
-            "referrer_amount" : referrer_amount ,
-            "referral_discount" : referral_discount ,
-            "referral_description" : referral_description ,
-            'refer' : refer
-        }
-        
-        return render(request, 'admin/referral.html' , context)
-    return render(request, 'admin/referral.html' )
+    if request.user.is_authenticated and request.user.is_superuser: 
+        refer=ReferralOffers.objects.all().order_by('-id')
+        if refer:
+            referrer_amount=refer[0].referrer_amount
+            referral_discount=refer[0].referral_discount
+            referral_description=refer[0].referral_description    
+            
+            context={
+                "referrer_amount" : referrer_amount ,
+                "referral_discount" : referral_discount ,
+                "referral_description" : referral_description ,
+                'refer' : refer
+            }
+            
+            return render(request, 'admin/referral.html' , context)
+        return render(request, 'admin/referral.html' )
+    else:
+        return redirect('_admin_signin')
 
 def add_referral(request):
-    if request.method=='POST':
-        referrer_amount=request.POST['referrer_amount']
-        referral_discount=request.POST['referral_discount']
-        referral_description=request.POST['referral_description']
+    if request.user.is_authenticated and request.user.is_superuser: 
+        if request.method=='POST':
+            referrer_amount=request.POST['referrer_amount']
+            referral_discount=request.POST['referral_discount']
+            referral_description=request.POST['referral_description']
+            
+            ReferralOffers.objects.create(referrer_amount=referrer_amount,referral_discount=referral_discount, referral_description=referral_description  )
+            return redirect('referral')
         
-        ReferralOffers.objects.create(referrer_amount=referrer_amount,referral_discount=referral_discount, referral_description=referral_description  )
-        return redirect('referral')
-    
-    return render (request, 'admin/add_referral.html')
+        return render (request, 'admin/add_referral.html')
+    else:
+        return redirect('_admin_signin')
 
 def edit_referral(request):
-    refer=ReferralOffers.objects.all().order_by('-id')
-    if refer:
-        referrer_amount=refer[0].referrer_amount
-        referral_discount=refer[0].referral_discount
-        referral_description=refer[0].referral_description    
-        
-       
-    if request.method=='POST':
-        referrer_amount=request.POST['referrer_amount']
-        referral_discount=request.POST['referral_discount']
-        referral_description=request.POST['referral_description']
-        
+    if request.user.is_authenticated and request.user.is_superuser: 
+        refer=ReferralOffers.objects.all().order_by('-id')
         if refer:
-            refer[0].referrer_amount=referrer_amount
-            refer[0].referral_discount =referral_discount
-            refer[0].referral_description =  referral_description 
+            referrer_amount=refer[0].referrer_amount
+            referral_discount=refer[0].referral_discount
+            referral_description=refer[0].referral_description    
             
-            refer[0].save()
-            return redirect('referral')
-    context={
-            "referrer_amount" : referrer_amount ,
-            "referral_discount" : referral_discount ,
-            "referral_description" : referral_description ,
-            'refer' : refer
-        }
-    return render(request, 'admin/edit_referral.html', context)
+        
+        if request.method=='POST':
+            referrer_amount=request.POST['referrer_amount']
+            referral_discount=request.POST['referral_discount']
+            referral_description=request.POST['referral_description']
+            
+            if refer:
+                refer[0].referrer_amount=referrer_amount
+                refer[0].referral_discount =referral_discount
+                refer[0].referral_description =  referral_description 
+                
+                refer[0].save()
+                return redirect('referral')
+        context={
+                "referrer_amount" : referrer_amount ,
+                "referral_discount" : referral_discount ,
+                "referral_description" : referral_description ,
+                'refer' : refer
+            }
+        return render(request, 'admin/edit_referral.html', context)
+    else:
+        return redirect ('_admin_signin')
 
 def delete_referral(request):
-    refer=ReferralOffers.objects.all().order_by('-id')
-    refer[0].delete()
-    return redirect('referral')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        refer=ReferralOffers.objects.all().order_by('-id')
+        refer[0].delete()
+        return redirect('referral')
+    else:
+        return redirect ('_admin_signin')
 
 
 def banners(request):
-    banners=Slider.objects.all()
-    
-    context={
-        'banners' : banners
-    }
-    return render (request, 'admin/bannerlist.html' , context)
+    if request.user.is_authenticated and request.user.is_superuser: 
+        banners=Slider.objects.all()
+        
+        context={
+            'banners' : banners
+        }
+        return render (request, 'admin/bannerlist.html' , context)
+    else:
+        return redirect ('_admin_signin')
 
 def create_banner(request):
-    if request.method =="POST":
-        Image = request.FILES.get('Image')
-        Discount_deals = request.POST.get('Discount_deals')
-        Product = request.POST.get('Product')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        if request.method =="POST":
+            Image = request.FILES.get('Image')
+            Discount_deals = request.POST.get('Discount_deals')
+            Product = request.POST.get('Product')
 
-        product=ProductVariant.objects.get(id=Product)
-        banner=Slider.objects.create(Image=Image, Discount_deals=Discount_deals, Product=product)
-        return redirect('banners')
-    products = ProductVariant.objects.all()
-    deals_choices = [choice[1] for choice in Slider.DISCOUNT_DEALS]
-    context={
-        'products' : products,
-        'deals_choices': deals_choices,
-    }
-    return render (request, 'admin/create_banner.html' , context)
+            product=ProductVariant.objects.get(id=Product)
+            banner=Slider.objects.create(Image=Image, Discount_deals=Discount_deals, Product=product)
+            return redirect('banners')
+        products = ProductVariant.objects.all()
+        deals_choices = [choice[1] for choice in Slider.DISCOUNT_DEALS]
+        context={
+            'products' : products,
+            'deals_choices': deals_choices,
+        }
+        return render (request, 'admin/create_banner.html' , context)
+    else:
+        return redirect ('_admin_signin')
 
 
 def delete_banner(request,banner_id):
-    banner=Slider.objects.get(id=banner_id)
-    banner.delete()
-    
-    return redirect('banners')
+    if request.user.is_authenticated and request.user.is_superuser: 
+        banner=Slider.objects.get(id=banner_id)
+        banner.delete()
+        
+        return redirect('banners')
+    else:
+        return redirect ('_admin_signin')
 

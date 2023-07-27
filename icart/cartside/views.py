@@ -11,12 +11,18 @@ from django.core.paginator import Paginator
 
 # Create your views here.
 def addcart_wishlist(request,slug):
-    if request.user.is_authenticated:
-            user=request.user
-            cart = UserCart.objects.get(user=user)
+            if request.user.is_authenticated:
+                user=request.user
+                cart = UserCart.objects.get(user=user)
+            else:
+                cart_id=request.session.get('cart_id')
+                if not cart_id:
+                    cart=UserCart.objects.create()
+                    request.session['cart_id']=cart.id
+                else :
+                    cart=UserCart.objects.get(id=cart_id)
             quantity = 1
             productvariant = get_object_or_404(ProductVariant, slug=slug)
-            user = request.user
             price = Decimal(productvariant.price)
             totalprice = price * Decimal(quantity)
             #if the product has discount price then applying it
@@ -40,11 +46,9 @@ def addcart_wishlist(request,slug):
                     Cart.objects.create(cart_id=cart, product=productvariant, quantity=quantity, price=totalprice)
                 messages.success(request, 'Item Added to Cart')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    else:
-        return redirect('signin')
+    
 
             
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def addcart(request, slug):
     #if user is logged in 
         if request.user.is_authenticated:
@@ -239,27 +243,43 @@ from django.http import JsonResponse
 
 #function to add item to wishlist
 def addwishlist(request):
-    user=request.user
-    slug=request.POST['slug']
-    product=ProductVariant.objects.get(slug=slug)
-    
-    wishlist=UserWishlist.objects.get(user=user)
-    
-    if not Wishlist.objects.filter(wishlist_id=wishlist, product=product).exists():
-    
-        Wishlist.objects.create(wishlist_id=wishlist, product=product)
-    success = True    
-    
-    return JsonResponse({success : 'success'})
+        if request.user.is_authenticated:
+            user=request.user
+            wishlist=UserWishlist.objects.get(user=user)
+        else:
+            wishlist_id=request.session.get('wishlist_id')
+            if not wishlist_id:
+                wishlist=UserWishlist.objects.create()
+                request.session['wishlist_id']=wishlist.id
+            else :
+                wishlist=UserWishlist.objects.get(id=wishlist_id)
+                
+            
+        slug=request.POST['slug']
+        product=ProductVariant.objects.get(slug=slug)
+        
+        
+        if not Wishlist.objects.filter(wishlist_id=wishlist, product=product).exists():
+        
+            Wishlist.objects.create(wishlist_id=wishlist, product=product)
+        success = True    
+        
+        return JsonResponse({success : 'success'})
+  
 
 
 #function to remove item from wishlist
 def removewishlist(request):
-    user=request.user
+    if request.user.is_authenticated:
+        user=request.user
+        wishlist=UserWishlist.objects.get(user=user)
+    else:
+        wishlist_id=request.session.get('wishlist_id')
+        wishlist=UserWishlist.objects.get(id=wishlist_id)
+
     slug=request.POST['slug']
     product=ProductVariant.objects.get(slug=slug)
     
-    wishlist=UserWishlist.objects.get(user=user)
     
     if  Wishlist.objects.filter(wishlist_id=wishlist, product=product).exists():
         item=Wishlist.objects.get(wishlist_id=wishlist, product=product)
@@ -270,16 +290,27 @@ def removewishlist(request):
     
 #function to render wishlist page   
 def wishlist(request):
-    user =request.user
-    wishlist=UserWishlist.objects.get(user=user)
-    items=Wishlist.objects.filter(wishlist_id=wishlist)
-    
-    paginator = Paginator(items, 4) 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context={
-        'items': page_obj
-    }
-    
-    return render (request, 'wishlist.html', context)
+        if request.user.is_authenticated:
+            user =request.user
+            wishlist=UserWishlist.objects.get(user=user)
+        else:
+            wishlist_id=request.session.get('wishlist_id')
+            if not wishlist_id:
+                    wishlist=UserWishlist.objects.create()
+                    wishlist_id=wishlist.id
+                    print(cart)
+                    request.session['wishlist_id']=wishlist_id
+            wishlist=UserWishlist.objects.get(id=wishlist_id)
+        
+        items=Wishlist.objects.filter(wishlist_id=wishlist)
+        
+        paginator = Paginator(items, 4) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context={
+            'items': page_obj
+        }
+        
+        return render (request, 'wishlist.html', context)
+        

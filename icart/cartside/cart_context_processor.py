@@ -14,7 +14,6 @@ def cart_item_count_context(request):
         return {'cart_item_count': cart_item_count}
     else:
         cart_item_count = 0 
-        
         return {'cart_item_count': cart_item_count}
 
 
