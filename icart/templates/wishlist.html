@@ -1,5 +1,13 @@
 {% extends 'base1.html' %}
 {% load static %}
+{% block links %}
+<style>
+    /* Add a custom class to target the shopping cart icon */
+    .shopping-cart-icon {
+        font-size: 60px; /* Set the desired font size (e.g., 24px) */
+    }
+</style>
+{% endblock  %}
 {% block content %}
 <div class="shop_sidebar_area">
 
@@ -32,28 +40,7 @@
 <div class="amado_product_area section-padding-100">
   <div class="container-fluid">
 
-      <div class="row  ">
-          <div class="col-12 d-flex justify-content-end">
-              <div class="product-topbar d-xl-flex align-items-end justify-content-between">
-                  <!-- Total Products -->
-                  
-                  <!-- Sorting -->
-                  <div class="product-sorting  d-flex">
-                      <div class="sort-by-date d-flex align-items-center mr-15">
-                          <p>Sort by</p>
-                          <form action="#" method="get">
-                              <select name="select" id="sortBydate">
-                                  <option value="value">Newest</option>
-                                  <option value="value">Popular</option>
-                                  <option value="value">Price</option>
-                              </select>
-                          </form>
-                      </div>
-                      
-                  </div>
-              </div>
-          </div>
-      </div>
+      
 
       <div class="row">
 
@@ -72,7 +59,7 @@
                   </div>
               </a>
                   <!-- Product Description -->
-                  <div class="product-description d-flex align-items-center justify-content-between">
+                  <div class="product-description d-flex align-items-center justify-content-between footer_textitems">
                       <!-- Product Meta Data -->
                       <div class="product-meta-data">
                           <div class="line"></div>
@@ -82,8 +69,8 @@
                       </div>
                       <!-- Ratings & Cart -->
                       <div class="ratings-cart text-right">
-
-                          <div class="ratings">
+                      <a href="{%url 'addcart_wishlist' product.product.slug %}"><img src="https://t3.ftcdn.net/jpg/05/60/17/66/360_F_560176615_cUua21qgzxDiLiiyiVGYjUnLSGnVLIi6.jpg" width='35' height='30' alt=""></a>
+                        <div class="ratings">
                               <i class="fa fa-star" aria-hidden="true"></i>
                               <i class="fa fa-star" aria-hidden="true"></i>
                               <i class="fa fa-star" aria-hidden="true"></i>
@@ -102,23 +89,23 @@
 
           {% endfor %}
           <!-- Pagination -->
-          {% if products.has_other_pages %}
+          {% if items.has_other_pages %}
           <div class="row w-100 col-12">
             <div class="col-12">
               
               <nav aria-label="navigation">
                 <ul class="pagination justify-content-center mt-50">
-                  {% if products.has_previous %}
+                  {% if items.has_previous %}
                     {% comment %} <li class="page-item"><a class="page-link" href="?page=1">First</a></li> {% endcomment %}
-                    <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}"><</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ items.previous_page_number }}"><</a></li>
                   {% endif %}
         
                   
-                  <li class="page-item active"><a class="page-link" href="?page={{ products.number }}">{{ products.number }}</a></li>
+                  <li class="page-item active"><a class="page-link" href="?page={{ items.number }}">{{ items.number }}</a></li>
                    
         
-                  {% if products.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">></a></li>
+                  {% if items.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ items.next_page_number }}">></a></li>
                     {% comment %} <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">Last</a></li> {% endcomment %}
                   {% endif %}
                 </ul>

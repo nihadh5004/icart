@@ -1,0 +1,70 @@
+{% extends 'admin/admin_base.html' %}
+
+
+{% block content %}
+<div class="cart-table-area section-padding-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="checkout_details_area mt-50 clearfix">
+  
+                    <div class="cart-title">
+                        <h2>Add new variant</h2>
+                    </div>
+  
+                    <form method="POST" action="{%url 'create_banner' %}"   enctype="multipart/form-data">
+                      {% csrf_token %}
+                        <div class="row">
+                            
+                          
+                        
+                       
+                       <div class="form-outline mb-4 col-md-12 mt-5">
+                          <label class="form-label" for="contactBlockPhone3">Banner</label>
+                       </div>
+                       <div class="col-md-6">
+                        <div class="form-outline mb-4">
+                            <select class="form-select" id="contactBlockStorage" name="Discount_deals">
+                                <option value="" selected disabled>Select A Deal</option>
+                                {% for deal in deals_choices %}
+                                <option value="{{ deal }}">{{ deal }}</option>
+                                {% endfor %}
+                            </select>
+                            <label class="form-label" for="contactBlockStorage">Deals</label>
+                        </div>
+                       </div>
+                       <div class="col-md-6">
+                        <div class="form-outline mb-4">
+                            <select class="form-select" id="contactBlockColour" name="Product">
+                                <option value="" selected disabled>Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}">{{ product }}</option>
+                                {% endfor %}
+                            </select>
+                            <label class="form-label" for="contactBlockColour">Color</label>
+                        </div>
+                       </div>
+                          
+                         
+                          <div class="col-md-12 text-left">
+                            <div class="form-outline mb-4">
+                                <label class="form-label" for="contactBlockImage">Display Image</label>
+                                <input type="file" id="contactBlockImage" class="form-control" name="Image" required>
+                            </div>
+                          </div>
+                    
+                      </div>
+                     
+                      
+                        <button class='btn btn-outline-success col-md-12  px-4 mt-5 ' type='submit'>Add Banner</button>
+                        <div class="form-outline mb-4 mt-5">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+  </div>
+
+{% endblock  %}

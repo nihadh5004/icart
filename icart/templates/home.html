@@ -1,5 +1,30 @@
 {% extends 'base1.html' %}
 {% load static %}
+{% block links %}
+
+<style>
+  
+@media only screen and (max-width: 767px) {
+    /* Add your custom styles here for mobile devices */
+    .carousel-caption h3 {
+        font-size: 18px; /* Adjust the font size as per your requirement */
+    }
+
+    .carousel-caption h1 {
+        font-size: 16px; /* Adjust the font size as per your requirement */
+    }
+
+    .carousel-caption h5 {
+        font-size: 14px; /* Adjust the font size as per your requirement */
+    }
+
+
+
+}
+
+</style>
+
+{% endblock  %}
 {% block home_slider %}
 <div id="myCarousel" class="carousel slide" data-ride="carousel">
     <ol class="carousel-indicators">
@@ -10,16 +35,18 @@
     
   <div class="carousel-inner">
     {% for item in sliders %}
-    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-      <img src="{{ item.Image }}" alt="{{ item.Product.name }}" class="d-block w-100">
-      <div class="carousel-caption ">
-          <p class='text-left ' style='font-family:Century Gothic; '>{{ item.Discount_deals }}</p>
-        <h3 class='text-left text-white  font-weight-bold'>{{ item.Product.product.name }}</h3>
-        <h1 class='text-left text-white'>Discount sale of {{ item.Product.discount }}%</h1>
-        <a href="{% url 'product_detail' item.Product.product.slug %}?color={{ item.Product.color }}&storage={{ item.Product.storage }}"><h5 class='text-left text-secondary'>Shop Now</h5></a>
-        
-
-      </div>
+    <div class="carousel-item {% if forloop.first %}active{% endif %}" style="font-family: Century Gothic; ">
+      <img src="{{ item.Image.url }}" alt="{{ item.Product.name }}" class="d-block w-100">
+      <div class="carousel-caption mb-5">
+        <h5 class='text-left ' style='font-family:Century Gothic;'>{{ item.Discount_deals }}</h5>
+        <h1 class='text-left  text-uppercase font-weight-bold'>{{ item.Product.product.name }}</h1>
+        <h3 class='text-left  py-2'>Discount sale of {{ item.Product.discount }}%</h3>
+        <a href="{% url 'product_detail' item.Product.product.slug %}?color={{ item.Product.color }}&storage={{ item.Product.storage }}" class="text-left ml-5 d-block">
+            <button class='bg-light'><h5 class='px-2 mt-1 text-dark'>Shop Now</h5></button>
+        </a>
+    </div>
+    
+    
     </div>
     {% endfor %}
   </div>
@@ -48,10 +75,10 @@
               <a href="{% url 'product_detail' product.slug %}?color={{ variant.color }}&storage={{ variant.storage }}">
                 <img src="{{ variant.displayimage.url }}" alt="{{ product.name }}">
                     <!-- Hover Content -->
-                    <div class="hover-content">
+                    <div class="hover-content" style='font-family:Century Gothic;'>
                         <div class="line"></div>
                         <p> ${{ variant.price }}</p>
-                        <h4>{{ product.name }}</h4>
+                        <h4 class='text-uppercase '>{{ product.name }}</h4>
                     </div>
                 </a>
               {% endwith %}

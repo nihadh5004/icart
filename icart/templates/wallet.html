@@ -11,12 +11,13 @@
     {% comment %} <img class="card-img-top" src="https://mdbootstrap.com/img/Photos/Others/images/43.webp" alt="Card image cap"> {% endcomment %}
   
     <!-- Card content -->
-    <div class="card-body">
+    <div class="card-body "  style="font-family: Century Gothic;">
   
       <!-- Title -->
-      <div class='bg-secondary  col-12'>
+      <div class='bg-light d-flex justify-content-between col-12'>
 
           <h1 class='py-4 '>Wallet</h1>
+          <img  src="https://cdn-icons-png.flaticon.com/512/3359/3359235.png"  alt="" width='50' height='30'>
       </div>
       {% if not wallet.money %}
       <h3 class='text-center py-5'>Wallet amount : 0</h3>

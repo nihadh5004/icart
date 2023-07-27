@@ -73,6 +73,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cartside.cart_context_processor.cart_item_count_context',
+                'cartside.cart_context_processor.wishlist_item_count_context'
             ],
         },
     },

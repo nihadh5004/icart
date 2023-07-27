@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .invoice {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-header {
+            text-align: center;
+        }
+        .invoice-details {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .invoice-items {
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .invoice-items th,
+        .invoice-items td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        .invoice-total {
+            margin-top: 30px;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <div class="invoice-header">
+            <h2>Invoice</h2>
+            <p>Invoice Number: #{{order.id}}</p>
+            <p>Date: {{ order.order_date.date }}</p>
+        </div>
+        <div class="invoice-details">
+            <div>
+                <h3>Bill To: <br>{{ order.address.fullname }} <br> {{ order.address.city }} <br> {{ order.address.contact }} <br></h3>
+                
+            </div>
+            <div>
+                <h3>Ship To: <br> {{ order.address.fullname }} <br> {{ order.address.address }} <br>{{order.address.street}} <br>{{ order.address.city }} <br> {{ order.address.pincode }} </h3>
+                
+            </div>
+        </div>
+        <table class="invoice-items">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td>${{ item.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="invoice-total">
+            <p>Total: ${{ order.total_price }}</p>
+        </div>
+    </div>
+</body>
+</html>

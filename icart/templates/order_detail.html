@@ -132,22 +132,29 @@ body {
 {% endblock  %}
 {% block content %}
 <section class="h-100 gradient-custom">
-    <div class="container py-5 h-100">
+    <div class="container py-5 h-100 footer_text">
       <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-lg-10 col-xl-8">
           <div class="card" style="border-radius: 10px;">
             <div class="card-header px-4 py-5">
+             
               <h5 class="text-muted mb-0">Thanks for your Order, <span style="color: #a8729a;">{{order.user}}</span>!</h5>
+              
+
+              
             </div>
+            
             <div class="card-body p-4">
               <div class="d-flex justify-content-between align-items-center mb-4">
                 <p class="small text-muted mb-0">Order Id  : {{order.id}}</p>
                 {% if order.payment_status == "CANCELLED" %}
-                <p class="small text-muted mb-0 ">Order Status  : <span class='text-danger h5'>{{order.payment_status}}</span></p>
-                {% else %}
-                <p class="small text-muted mb-0 ">Order Status  : <span class='text-muted h5'>{{order.payment_status}}</span></p>
+                <p class="small text-muted mb-0 ">Order Status  : <span class='text-danger h5' id="payment_status">{{order.payment_status}}</span></p>
+                {% else  %}
+                <p class="small text-muted mb-0 ">Order Status  : <span class='text-muted h5' id="payment_status">{{order.payment_status}}</span></p>
                 {% endif %}
+                
               </div>
+              
               {% for order in order.orderlist_set.all %}
               <div class="card shadow-0 border mb-4">
                 <div class="card-body">
@@ -190,14 +197,19 @@ body {
   
               <div class="d-flex justify-content-between">
                 <p class="text-muted mb-0">Ordered Date : {{order.order_date.date}}</p>
-                <p class="text-muted mb-0"><span class="fw-bold me-4">Delivery Charges</span> Free</p>
+                <p class="text-muted mb-0"><span class="fw-bold me-4">Delivery Charges:</span> Free</p>
               </div>
   
               <div class="d-flex justify-content-between mb-5">
                 <p class="text-muted mb-0">Expected Delivery : {{order.delivery_date.date}}</p>
-                <p class="text-muted mb-0"><span class="fw-bold me-4">Order Total</span> {{order.total_price}}</p>
+                <p class="text-muted mb-0"><span class="fw-bold me-4">Order Total:</span> {{order.total_price}}</p>
               </div>
-              {% if order.payment_status != "RETURNED" and  order.payment_status != "CANCELLED" %}
+              <div class="d-flex justify-content-between mb-5">
+                {% if order.payment_status == "DELIVERED" %}
+                <div class=" "><a href="{%url 'download_invoice' order.id%}"> <p>Download Invoice</p></a></div>
+                {% endif %}
+              </div>
+              {% if order.payment_status != "RETURNED" and  order.payment_status != "CANCELLED" and  order.payment_status != "PENDING" %}
                   <button id="toggleButton" class='btn'>Track Order</button>
                   {% endif %}
               <div id="extraDiv" style="display: none;">
@@ -427,24 +439,23 @@ toggleButton.addEventListener('click', () => {
   }
   
   function addToWallet(orderId) {
+    if (confirm("Are you sure you want to return this order?")) {
     // Logic to add the money to the wallet
     $.ajax({
-      url: '/return_order' ,
+      url: '/initiate_return' ,
       method: 'POST',
       headers: { 'X-CSRFToken': '{{ csrf_token }}' },
       data: { order_id: orderId },
       success: function(response) {
-        alert("Money has been added to the wallet for order " + orderId);       
-         location.reload();
-        // Order canceled successfully
-        // Handle any additional actions or update the UI as needed
+        $("#payment_status" ).text(response.payment_status);
+        location.reload();
       },
       error: function(xhr, status, error) {
         console.log('Return order error:', error);
         // Handle the cancel order error if needed
       }
     }); 
-  
+    }
     // Display a success message
     
   }

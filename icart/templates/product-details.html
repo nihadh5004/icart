@@ -30,7 +30,7 @@
                 <div class="row">
                     <div class="col-12">
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mt-50">
+                            <ol class="breadcrumb mt-50"  style="font-family: Century Gothic; font-weight: bold;">
                                 <li class="breadcrumb-item"><a href="/shop">Shop</a></li>
                                 <li class="breadcrumb-item"><a href="/shop?category={{product.category.id}}">{{product.category}}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">{{product.name}}</li>
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <div class="single_product_desc">
+                        <div class="single_product_desc"  style="font-family: Century Gothic; ">
                             <!-- Product Meta Data -->
                             <div class="product-meta-data">
                                 <div class="line"></div>
@@ -91,7 +91,7 @@
                               {% endif %}
                               
                                 <a href="product-details.html">
-                                    <h6 class="text-uppercase">{{product.name}}({{productvariant.color}},{{productvariant.storage}})</h6>
+                                    <h6 class="text-uppercase" style="font-weight: bold;">{{product.name}}({{productvariant.color}},{{productvariant.storage}})</h6>
                                 </a>
                                 <!-- Ratings & Review -->
                                 <div class="ratings-review mb-15 d-flex align-items-center justify-content-between">
@@ -120,34 +120,32 @@
                             </div>
                             
                             <div class="widget color mb-50">
-                                <!-- Widget Title -->
-
-                                <div class="">
-                                    <ul class="d-flex ">
-                                        {% for storage in storages %}
-                                        <button type="button" class="btn ml-2 {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
-                                            <a href="{% url 'product_detail' product.slug %}?color={{ productvariant.color }}&storage={{ storage }}">
-                                                {{ storage }}</a>
-                                        </button>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-
-                                <h6 class="widget-title mb-30 mt-2">Available Colours</h6>
-                        
-                                <div class="">
-                                    <ul class="d-flex ">
-                                        {% for color in colors %}
-                                        <button type="button" class="btn ml-2 {% if variant == product %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
-                                            <a href="{% url 'product_detail' product.slug %}?color={{ color }}&storage={{ productvariant.storage }}">
-                                                {{ color }}</a>
-                                        </button>
-                                        {% endfor %}
-                                      
-                                      </ul>
-                                </div>
-                            </div>
-                        
+                              <!-- Widget Title -->
+                              <h6 class="widget-title mb-30 mt-2">Available Storage</h6>
+                              <div class="">
+                                  <ul class="d-flex ">
+                                      {% for storage in storages %}
+                                      <button type="button" class="btn ml-2 {% if storage == productvariant.storage.storage %}btn-secondary {% else %}btn-outline-secondary{% endif %} px-3">
+                                          <a href="{% url 'product_detail' product.slug %}?color={{ productvariant.color }}&storage={{ storage }}">
+                                              {{ storage }}</a>
+                                      </button>
+                                      {% endfor %}
+                                  </ul>
+                              </div>
+                          
+                              <h6 class="widget-title mb-30 mt-2">Available Colours</h6>
+                              <div class="">
+                                  <ul class="d-flex ">
+                                      {% for color in colors %}
+                                      <button type="button" class="btn ml-2 {% if color == productvariant.color.color %}btn-secondary{% else %}btn-outline-secondary{% endif %} px-3">
+                                          <a href="{% url 'product_detail' product.slug %}?color={{ color }}&storage={{ productvariant.storage }}">
+                                              {{ color }}</a>
+                                      </button>
+                                      {% endfor %}
+                                  </ul>
+                              </div>
+                          </div>
+                          
 
                             <!-- Add to Cart Form -->
                             <form class="cart clearfix" method="post" action="{% url 'addcart' productvariant.slug  %}">
@@ -167,8 +165,8 @@
                     </div>
                 </div>
             </div>
-            <div class="text-center mb-4 mt-4">
-                <h2 class="section-title px-5"><span class="px-2">You May Also Like</span></h2>
+            <div class="text-center mb-4 mt-5">
+                <h2 class="section-title px-5 "><span class="px-2">You May Also Like</span></h2>
             </div>
             
             
@@ -179,8 +177,8 @@
 
                     <img class="card-img-top" src="{{ product.displayimage.url }}" alt="Product Image">
                     <div class="card-body">
-                     <a href="{% url 'product_detail' related_product.slug %}?color={{ product.color }}&storage={{ product.storage }}"> <h3 class="card-title text-center">{{ related_product.name }}</h3></a>
-                      <h5 class="card-title text-center">{{ product.price }}</h5>
+                     <a href="{% url 'product_detail' related_product.slug %}?color={{ product.color }}&storage={{ product.storage }}"> <h3 class="card-title text-center text-uppercase" style="font-family: Century Gothic; ">{{ related_product.name }}</h3></a>
+                      <h5 class="card-title text-center" style="font-family: Century Gothic;">{{ product.price }}</h5>
                     </div>
                     {% endwith %}
 

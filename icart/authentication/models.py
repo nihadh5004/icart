@@ -1,7 +1,8 @@
 
 from django.db import models
 from productside.models import ProductVariant
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
     
     
@@ -11,7 +12,7 @@ class Slider(models.Model):
         ('NEW ARRIVALS', 'NEW ARRIVALS'),
         ('SPECIAL OFFERS', 'SPECIAL OFFERS'),
     )
-    Image=models.ImageField(upload_to='media/slider_imgs')
+    Image=models.ImageField(upload_to='slider_images')
     Discount_deals=models.CharField(choices=DISCOUNT_DEALS,max_length=100,null=True)
     Product=models.ForeignKey(ProductVariant,on_delete=models.CASCADE,null=True)    
     
@@ -70,3 +71,18 @@ class ReferralCode(models.Model):
 
             # Create a new ReferralCode instance and associate it with the user
             ReferralCode.objects.create(user=instance, referral_code=referral_code)
+            
+
+class PersonalDetails(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    contact = models.CharField(max_length=15, null=True, blank=True)
+    country = models.CharField(max_length=15, null=True, blank=True)
+    state = models.CharField(max_length=15, null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username
+    
+    @receiver(post_save, sender=User)
+    def create_user_wishlist(sender, instance, created, **kwargs):
+        if created:
+            PersonalDetails.objects.create(user=instance)

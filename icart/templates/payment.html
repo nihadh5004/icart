@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-12 col-lg-8">
                 <div class="cart-title mt-50">
-                    <h2>Delivery address</h2>
+                    <h2 style="font-family: Century Gothic;">Delivery address</h2>
                 </div>
 
                 <div class="cart-table clearfix bg-light">
@@ -24,9 +24,9 @@
                                   
                                   <div class="row col-md-5">
                                     <div class="col-md-6">
-                                      <h5 class="text-uppercase">{{ address.fullname }}</h5>
+                                      <h5 class="text-uppercase" style="font-family: Century Gothic;">{{ address.fullname }}</h5>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-12" style="font-family: Century Gothic;">
                                       <div><h5>{{ address.address }}</h5></div>
                                       <div><h5>{{ address.street }}</h5></div>
                                       <div><h5>{{ address.city }}</h5></div>
@@ -49,9 +49,9 @@
             </div>
             <div class="col-12 col-lg-4">
                 <div class="cart-summary">
-                    <h5>Payment</h5>
+                    <h5 style="font-family: Century Gothic;">Payment</h5>
                    
-                    <div class="payment-method mt-3">
+                    <div class="payment-method mt-3" style="font-family: Century Gothic;">
                         <!-- Cash on delivery -->
                         <div class="custom-control custom-radio mr-sm-2">
                             <input type="radio" class="custom-control-input payment-radio" id="cod" name="paymentMethod" value="COD">
@@ -78,7 +78,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-8">
+            <div class="col-12 col-lg-8" style="font-family: Century Gothic;">
                 <div class="col-12 col-lg-12">
                     <div class="cart-summary">
                         <h5>Cart Total</h5>
@@ -87,7 +87,7 @@
                             <li><span>delivery:</span> <span>Free</span></li>
                             <li><span>discount:</span> <span>{{discount_amount}}</span></li>
                             {% if cart_id.coupon  %}
-                            <li><span class='font-weight-bold'>Coupon</span> <a href="{% url 'delete_coupon' cart_id.id %}"><span>{{cart_id.coupon}}</span></li></a>
+                            <li><span class='font-weight-bold'>Coupon</span> <span>{{cart_id.coupon}}</span></li>
                             {% endif %}
                             <li><span class='font-weight-bold'>total:</span> <span>${{discount_price}}</span></li>
                         </ul>

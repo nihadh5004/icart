@@ -48,6 +48,31 @@
                   {% endfor %}
                 </tbody>
               </table>
+                  <!-- Pagination -->
+            {% if users.has_other_pages %}
+            <div class="row w-100 col-12">
+              <div class="col-12">
+                
+                <nav aria-label="navigation">
+                  <ul class="pagination justify-content-center mt-50">
+                    {% if users.has_previous %}
+                      {% comment %} <li class="page-item"><a class="page-link" href="?page=1">First</a></li> {% endcomment %}
+                      <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}"><</a></li>
+                    {% endif %}
+          
+                    
+                    <li class="page-item active"><a class="page-link" href="?page={{ users.number }}">{{ users.number }}</a></li>
+                     
+          
+                    {% if users.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{ users.next_page_number }}">></a></li>
+                      {% comment %} <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">Last</a></li> {% endcomment %}
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          {% endif %}
           </div>
       </div>
   </div>

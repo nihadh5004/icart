@@ -9,6 +9,8 @@ from datetime import date
 from django.db.models import Sum, Count
 from datetime import datetime, timedelta
 from django.http import JsonResponse
+from django.http import HttpResponseRedirect
+from django.core.paginator import Paginator
 
 # from productside.forms import ProductForm
 
@@ -121,8 +123,17 @@ def _admin_dashboard(request):
                 ).order_by('order_date__date')
 
             
+            returned_orders = Order.objects.filter(
+                    order_date__date__range=[start_date, end_date],
+                    payment_status='PENDING'
+                ).values('order_date__date').annotate(
+                    order_count=Count('id'),
+                    total_price_sum=Sum('total_price')
+                ).order_by('order_date__date')
+
+            
             # The total count of the pending orders to be shipped
-            total_pending=ordered_orders.aggregate(total_pending=Sum('order_count'))['total_pending']
+            total_pending=returned_orders.aggregate(total_pending=Sum('order_count'))['total_pending']
 
 
 
@@ -219,8 +230,12 @@ def userlist(request):
     
     #Retreiving all users from the user table according to the date they has joined.
     users=User.objects.all().order_by('date_joined')
+     # Show  orders per page
+    paginator = Paginator(users, 10) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context={
-        'users': users
+        'users': page_obj
     }
     return render (request, 'admin/userlist.html', context)
 
@@ -282,8 +297,12 @@ def productlist(request):
     
     #Retreiving the total products from the products table based on descending order they has created.
     products=Product.objects.all().order_by('-id')
+     # Show  orders per page
+    paginator = Paginator(products, 10) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context={
-        'products': products
+        'products': page_obj
     }
     return render(request,'admin/productlist.html', context)
  
@@ -303,14 +322,26 @@ def undo_softdelete_product(request, product_id):
     product.save()
     return redirect('productlist') 
 
+def pending_orders(request):
+    orders=Order.objects.filter(payment_status="PENDING").order_by('-id')
+
+    context={
+        'orders' : orders
+    }
+    
+    return render (request, 'admin/pendinglist.html' , context)
 
 # Listing the total orders in th admin side.
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def orderlist(request):
     orders=Order.objects.all().order_by('-id')
-    
+     # Show  orders per page
+    paginator = Paginator(orders, 10) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context={
-        'orders' : orders
+        'orders' : page_obj,
+        
     }
     
     return render (request, 'admin/orderlist.html' , context)
@@ -359,10 +390,6 @@ def productvariantlist(request, product_id):
     }
    
     return render (request , 'admin/productvariantlist.html' , context)
-
-
-
-
 
 from django.utils.text import slugify
 
@@ -428,7 +455,16 @@ def add_variant(request, product_id):
         storage_obj = Storage.objects.get(storage=storage)
         color_obj = Color.objects.get(color=color)
         if price  and  discount  :
-                discount_price = float(price) - float(price) * (float(discount) / float(100))
+            # Validate discount value
+            try:
+                discount = int(discount)
+                if discount < 0 or discount > 100:
+                    raise ValueError("Discount must be a value between 0 and 100.")
+            except ValueError:
+                messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            
+            discount_price = float(price) - float(price) * (float(discount) / float(100))
         else:
             discount_price = None
             discount=None
@@ -469,12 +505,23 @@ def edit_variant(request, variant_id):
         display_image = request.FILES.get('display_image')
         images = request.FILES.getlist('images')
 
+        
+        
         # Update stock and price if provided
         if stock:
             variant.stock = stock
         if price:
             variant.price = price
         if  discount :
+            # Validate discount value
+            try:
+                discount=int(discount)
+                if discount < 0 or discount > 100:
+                    raise ValueError("Discount must be a value between 0 and 100.")
+            except ValueError:
+                messages.error(request, 'Invalid discount value. Discount must be a value between 0 and 100.')
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
             discount_price = float(variant.price) - float(variant.price) * (float(discount) / float(100))
             variant.discount=discount
             variant.discount_price=discount_price
@@ -517,9 +564,15 @@ def create_coupon(request):
         discount_price = request.POST['discount_price']
         minimum_amount = request.POST['minimum_amount']
         
-        Coupon.objects.create(coupon_code=coupon_name , discount_price = discount_price , minimum_amount = minimum_amount)
-        
-        return redirect('couponlist')  
+       # Check if a coupon with the same name already exists
+        if Coupon.objects.filter(coupon_code=coupon_name).exists():
+            messages.error(request, 'Coupon with this name already exists.')
+            return redirect('couponlist')
+        else:
+            # Create the coupon if it doesn't already exist
+            Coupon.objects.create(coupon_code=coupon_name, discount_price=discount_price, minimum_amount=minimum_amount)
+            messages.success(request, 'Coupon created successfully.')
+            return redirect('couponlist')
         
     return render(request, 'admin/create_coupon.html')
 
@@ -615,3 +668,37 @@ def delete_referral(request):
     refer=ReferralOffers.objects.all().order_by('-id')
     refer[0].delete()
     return redirect('referral')
+
+
+def banners(request):
+    banners=Slider.objects.all()
+    
+    context={
+        'banners' : banners
+    }
+    return render (request, 'admin/bannerlist.html' , context)
+
+def create_banner(request):
+    if request.method =="POST":
+        Image = request.FILES.get('Image')
+        Discount_deals = request.POST.get('Discount_deals')
+        Product = request.POST.get('Product')
+
+        product=ProductVariant.objects.get(id=Product)
+        banner=Slider.objects.create(Image=Image, Discount_deals=Discount_deals, Product=product)
+        return redirect('banners')
+    products = ProductVariant.objects.all()
+    deals_choices = [choice[1] for choice in Slider.DISCOUNT_DEALS]
+    context={
+        'products' : products,
+        'deals_choices': deals_choices,
+    }
+    return render (request, 'admin/create_banner.html' , context)
+
+
+def delete_banner(request,banner_id):
+    banner=Slider.objects.get(id=banner_id)
+    banner.delete()
+    
+    return redirect('banners')
+

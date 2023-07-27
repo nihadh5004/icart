@@ -10,6 +10,7 @@ urlpatterns = [
   path('my_orders', views.my_orders , name='my_orders'),
   path('_cancel_order', views.cancel_order , name='cancel_order'),
   path('return_order', views.return_order , name='return_order'),
+  path('initiate_return', views.initiate_return , name='initiate_return'),
   path('profile_details', views.profile_details , name='profile_details'),
   path('address', views.address, name='address'),
   path('profile_add_address', views.profile_add_address, name='profile_add_address'),
@@ -23,4 +24,5 @@ urlpatterns = [
   path('wallet_refund' ,views.wallet_refund, name='wallet_refund'),
   path('mail_to_emailchange' , views.mail_to_emailchange , name='mail_to_emailchange'),
   path('verify_otp_for_mail' , views.verify_otp_for_mail , name='verify_otp_for_mail'),
+  path('download_invoice/<int:order_id>', views.download_invoice , name='download_invoice')
 ]

@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(Slider)
 admin.site.register(ReferralCode)
 admin.site.register(ReferralOffers)
+admin.site.register(PersonalDetails)

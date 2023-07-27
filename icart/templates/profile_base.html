@@ -45,36 +45,82 @@
 <body style="display: flex; flex-direction: column; min-height: 100vh;">
   {% block popup %}
 {% endblock  %}
-  <nav class="navbar navbar-expand-lg  navbar-light bg-light">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNRBmn2cV7dOVgAiWfLJmNrPGpG2EoA49guw&usqp=CAU" width='50' height='50' alt="">       
-    <a class="navbar-brand" href="#">ICART</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<nav class="navbar navbar-expand-lg sticky-top  navbar-light bg-light" style="font-family: Century Gothic;">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNRBmn2cV7dOVgAiWfLJmNrPGpG2EoA49guw&usqp=CAU" width='50' height='50' alt="" >       
+  <a class="navbar-brand font-weight-bold" href="/">ICART</a>
   
-    <div class="collapse navbar-collapse ml-5" id="navbarTogglerDemo02">
-      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/">HOME <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/shop">SHOP <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/cart">CART <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/">WISHLIST <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/profile_details">PROFILE <span class=""></span></a>
-        </li>
-        
-      </ul>
-      
+  
+  <div class="mobile-nav ">
+    
+    <!-- Navbar Brand -->
+    <div class="amado-navbar-brand sticky-top ">
+        <a href="index.html"><img src="" alt=""></a>
     </div>
-  </nav>
-  
+    <!-- Navbar Toggler -->
+    <div class="amado-navbar-toggler">
+        <span></span><span></span><span></span>
+    </div>
+ </div>
+
+
+  <div class="collapse navbar-collapse ml-5" >
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <li class="nav-item active">
+              <a class="nav-link ml-5 font-weight-bold" href="/">HOME</a>
+          </li>
+          <li class="nav-item active">
+              <a class="nav-link ml-5 font-weight-bold" href="/shop">SHOP</a>
+          </li>
+          <li class="nav-item active">
+              <a class="nav-link ml-5 font-weight-bold" href="/cart">CART</i></a>
+          </li>
+          <li class="nav-item active">
+              <a class="nav-link ml-5 font-weight-bold" href="/wishlist">WISHLIST <i class="fas fa-heart"></i></a>
+          </li>
+          <li class="nav-item active">
+              <a class="nav-link ml-5 font-weight-bold" href="/profile_details">PROFILE </i></a>
+          </li>
+      </ul>
+      <ul class="navbar-nav nav-icons">
+        <li class="nav-item  active px-2">
+          <a href="/cart">
+            <div class="nav-link nav-icons" >
+
+              <i class="fa fa-shopping-cart nav-icons"></i></a>
+              {% if cart_item_count > 0 %}
+              <span class="cart-item-count">{{ cart_item_count }}</span>
+              {% endif %}              
+            </div>
+        </li>
+        <li class="nav-item  active px-2">
+              <a href="/wishlist">
+                <div class="nav-link nav-icons" >
+
+                  <i class="fa fa-heart nav-icons"></i></a>
+                </div>
+        </li>
+        {% if request.user.is_authenticated %}
+        <li class="nav-item active px-2">
+            <a href="/profile_details">
+              <div class="nav-link nav-icons user-authenticated">
+                  <i class="fa fa-user "></i>
+                  <span class='text-uppercase '>{{ request.user.username }}</span>
+                </div>
+              </a>
+        </li>
+        {% else %}
+        <li class="nav-item  active px-2">
+        <a href="/profile_details">
+          <div class="nav-link nav-icons" >
+
+            <i class="fa fa-user nav-icons"></i></a>
+          </div>
+        </li>
+      {% endif %}
+      </ul>
+  </div>
+</nav>
+
  
 {% for message in messages %}
   <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -134,11 +180,11 @@
             </div>
             <!-- Logo -->
             <div class="logo d-flex ">
-                <a href="index.html"><img src="https://static.vecteezy.com/system/resources/previews/005/544/718/original/profile-icon-design-free-vector.jpg" alt="" width="50px" height="50px"></a>
-                <h5 class=" text-uppercase">Hello {{request.user.username}}</h5>
+                <a href="/profile_details"><img src="https://static.vecteezy.com/system/resources/previews/005/544/718/original/profile-icon-design-free-vector.jpg" alt="" width="50px" height="50px"></a>
+                <h5 class=" text-uppercase "  style="font-family: Century Gothic;">Hello {{request.user.username}}</h5>
             </div>
             <!-- Amado Nav -->
-            <nav class="amado-nav ">
+            <nav class="amado-nav "  style="font-family: Century Gothic;">
                 <ul>
                     <li><a href="/">Home</a></li>
                     <li><a href="/profile_details">Personal Details</a></li>
@@ -177,7 +223,7 @@
             <!-- Grid column -->
             <div class="col-md-3 mt-3 mt-md-0 ">
               <!-- Content -->
-              <p class="h2 mt-3 footer_text">a complete<br>apple<br>solution on<br>your<br>fingertips.</p>
+              <p class="h2 mt-3 footer_text"  style="font-family: Century Gothic;">a complete<br>apple<br>solution on<br>your<br>fingertips.</p>
             </div>
             <!-- Grid column -->
             <!-- Grid column -->

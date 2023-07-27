@@ -14,7 +14,7 @@
     <div class="row">
       <div class="col-12 col-lg-12">
         <div class="cart-title mt-50">
-          <h2>Delivery address</h2>
+          <h2  style="font-family: Century Gothic;">Delivery address</h2>
         </div>
 
         <div class="row">
@@ -27,7 +27,7 @@
                     <label>
                       <div class="row mt-5">
                         
-                        <div class="col-md-8">
+                        <div class="col-md-8"  style="font-family: Century Gothic;">
                           <div class="row">
                             <div class="col-md-8">
                               <h5 class="text-uppercase">{{ address.fullname }}</h5>
@@ -47,12 +47,7 @@
                           </div>
                           <div class="row">
                             <div class="col-md-12">
-                              <a href="{% url 'edit_address'  address.id %}">
-                                <button class="btn btn-outline-secondary deliver-btn" style="display: none;">Edit Address</button>
-                              </a>
-                              <a href="{% url 'payment_page' address.id %}">
-                                <button class="btn btn-outline-success deliver-btn mt-2" style="display: none;">Deliver Here</button>
-                              </a>
+                             
                             </div>
                           </div>
                         </div>
@@ -67,10 +62,10 @@
         </div>
 
         <div class="row">
-          <div class="col-md-12">
-            <button class='btn btn-outline-secondary'>
+          <div class="col-md-12 mt-2">
+            <button >
               <a href="/profile_add_address">
-                <h4>Add new address</h4>
+                <h4  style="font-family: Century Gothic;" class='px-3 mt-1'>Add new address</h4>
               </a>
             </button>
           </div>

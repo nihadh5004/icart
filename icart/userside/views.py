@@ -5,17 +5,32 @@ from cartside.models import *
 from django.db.models import Sum
 from django.http import HttpResponseRedirect
 from authentication.models import *
+from django.core.paginator import Paginator
+
 # Create your views here.
 
 #checkout page 
 def checkout(request):
     if request.user.is_authenticated:
         user=request.user
+        
         addresses=Address.objects.filter(user=user)
         cart=UserCart.objects.get(user=user)
         products=Cart.objects.filter(cart_id=cart)
+        productstotal = Cart.objects.filter(cart_id=cart).aggregate(total_price=Sum('price'))
+        total_price = productstotal['total_price']
+        #Rechecking the user doesnt deleted and reduced the cart amount less than coupon min. amount
+        if cart.coupon:
+            if cart.coupon.minimum_amount > total_price:
+                return redirect('cart')
+                
         if not products:
             return redirect('shop')
+        for product in products:
+            if product.quantity > product.product.stock:
+                # The item has insufficient stock, redirect to cart page
+                messages.error(request, f"Sorry!!.Insufficient stock for '{product.product.product.name}'. Please update your cart.")
+                return redirect('cart')
         context={
             'addresses': addresses,
         }
@@ -236,8 +251,13 @@ def my_orders(request):
     user=request.user
     orders=Order.objects.filter(user=user).order_by('-id')
     
+    
+    paginator = Paginator(orders, 8) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context={
-       'orders': orders 
+       'orders': page_obj 
     }
 
     return render (request, 'my_orders.html' , context )
@@ -284,42 +304,57 @@ def address(request):
 from authentication.models import ReferralCode
 #details of the user
 def profile_details(request):
-    user = request.user
-    
-    referral_code=ReferralCode.objects.get(user=user)
-    if request.method == 'POST':
-        # Retrieve form data
-        username = request.POST['username']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        phone = request.POST['phone']
-        email = request.POST['email']
-        country = request.POST['country']
-        state = request.POST['state']
-
-        # Update user profile
-        if not username   :
-            messages.error(request , "Username Cant be blank")
-            return redirect('profile_details')
-        if not email   :
-            messages.error(request , "Email Cant be blank")
-            return redirect('profile_details')
+    if request.user.is_authenticated:
+        user = request.user
+        personal=PersonalDetails.objects.get(user=user)
+        referral_code=ReferralCode.objects.get(user=user)
+        if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Retrieve form data
+            username = request.POST['username']
+            first_name = request.POST['first_name']
+            last_name = request.POST['last_name']
+            phone = request.POST['phone']
+            email = request.POST['email']
+            country = request.POST['country']
+            state = request.POST['state']
+            
         
-        user.username = username
-        user.first_name = first_name
-        user.last_name = last_name
-        # user.phone = phone
-        user.email = email
-        user.save()
+            
+            
+            # Update user profile
+            if not username   :
+                messages.error(request , "Username Cant be blank")
+                return JsonResponse({'status': 'error', 'message': 'user not found'}, status=404)
+            if not email   :
+                messages.error(request , "Email Cant be blank")
+                return JsonResponse({'status': 'error', 'message': 'Order not found'}, status=404)
+            
+            personal.contact=phone
+            print(personal.contact)
+            personal.country=country
+            personal.state=state
+            personal.save()
+            
+            
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+            # user.phone = phone
+            user.email = email
+            user.save()
+            success=True
+            # Update additional profile fields if applicable
+            # ...
 
-        # Update additional profile fields if applicable
-        # ...
-
-        messages.success(request, 'Profile updated successfully.')
-        return redirect('profile_details')  # Redirect to the profile page or a success page
+            messages.success(request, 'Profile updated successfully.')
+            return JsonResponse({'success' : success})  # Redirect to the profile page or a success page
+    else:
+        messages.error(request, "please login !!")
+        return redirect('signin')
 
     context={
         'user' : user,
+        'personal' : personal,
         'referral_code': referral_code
     }
     
@@ -403,7 +438,16 @@ def initiate_refund(request):
             error_message = 'There is an issue with the server. Please try again later.'
             return JsonResponse({'error': str(e), 'error_message': error_message}, status=500)
     
-    
+def initiate_return(request):
+    order_id = request.POST.get('order_id')
+    order = Order.objects.get(id=order_id)
+    order.payment_status = 'PENDING'
+    order.save() 
+    data={
+        "payment_status" : order.payment_status
+    }
+    return JsonResponse(data)   
+
 def return_order(request):
     try:
         order_id = request.POST.get('order_id')
@@ -516,3 +560,41 @@ def wallet_refund(request):
         "success" : success
     }
     return JsonResponse(data)     
+
+
+
+from django.template.loader import get_template
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+
+def download_invoice(request, order_id):
+    order = Order.objects.get(id=order_id)
+    items=Orderlist.objects.filter(order_id=order)
+    # Get the HTML template for the invoice
+    template = get_template('invoice_template.html')
+    
+    # Define the context for the template
+    context = {
+        'order': order,
+        "items" : items,
+        # Add any other context variables you need for the invoice template
+    }
+    
+    # Render the template with the context
+    rendered_template = template.render(context)
+    
+    # Create a PDF response
+    pdf_response = HttpResponse(content_type='application/pdf')
+    pdf_response['Content-Disposition'] = 'attachment; filename="Invoice.pdf"'
+
+    # Generate the PDF from the HTML content
+    pisa_status = pisa.CreatePDF(
+        src=rendered_template,
+        dest=pdf_response,
+    )
+
+    # Check if PDF generation was successful
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed', status=500)
+
+    return pdf_response

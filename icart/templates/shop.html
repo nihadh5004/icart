@@ -4,9 +4,15 @@
 <div class="shop_sidebar_area">
 
     <!-- ##### Single Widget ##### -->
-    <div class="widget catagory mb-50">
+    <div class="nav-item active ml-1 " style="font-family: Century Gothic;">
+        
+            <a href="#" class="search-nav px-1 "><img src="https://www.freepnglogos.com/uploads/search-png/search-icon-transparent-images-vector-15.png" width='10' height='10'  alt="">SEARCH</a>        
+        
+        
+    </div>
+    <div class="widget catagory mb-50 mt-5" style="font-family: Century Gothic;">
         <!-- Widget Title -->
-        <h6 class="widget-title mb-30">Categories</h6>
+        <h6 class="widget-title mb-30" style='font-weight: bold;'>Categories</h6>
 
         <!--  Catagories  -->
         <div class="catagories-menu">
@@ -23,7 +29,7 @@
         </div>
     </div>
 
-    <button id="applyFilterButton" class='btn '>Filter Products</button>
+    <button id="applyFilterButton" class='btn ' style="font-family: Century Gothic;">Filter Price</button>
 
     
    
@@ -32,19 +38,19 @@
     <!-- ##### Single Widget - Color ##### -->
     <div class="widget color mb-50 mt-5" style="display: none;">
         <!-- Widget Title -->
-        <h6 class="widget-title mb-30">Color</h6>
+        {% comment %} <h6 class="widget-title mb-30">Color</h6>
         <div class="widget-desc">
             <ul class="d-flex">
                 <li><a href="#" class="color1"></a></li>
                 <li><a href="#" class="color5"></a></li>
                
             </ul>
-        </div>
+        </div> {% endcomment %}
         
     </div>
 
     <!-- ##### Single Widget - Price ##### -->
-    <div class="widget price mb-50" style="display: none;">
+    <div class="widget price mb-50 footer_text" style="display: none;">
         <!-- Widget Title -->
         <h6 class="widget-title mb-30">Price</h6>
 
@@ -99,10 +105,10 @@
         <!-- Product Description -->
         <div class="product-description d-flex align-items-center justify-content-between">
             <!-- Product Meta Data -->
-            <div class="product-meta-data">
+            <div class="product-meta-data" style="font-family: Century Gothic; ">
                 <div class="line"></div>
                 <p class="product-price">${{ product.selected_variant.price }}</p>
-                <h6>{{ product.name }}</h6>
+                <h6 class='text-uppercase' style='font-weight: bold;'>{{ product.name }}</h6>
             </div>
             <!-- Ratings & Cart -->
             <div class="ratings-cart text-right">
@@ -114,7 +120,7 @@
                     <i class="fa fa-star" aria-hidden="true"></i>
                 </div>
                 <div class="cart">
-                    <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="img/core-img/cart.png" alt=""></a>
+                    <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="" alt=""></a>
                 </div>
             </div>
         </div>

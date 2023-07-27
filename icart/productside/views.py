@@ -33,6 +33,9 @@ def shop(request):
     
     if max_price:
         products=filtered_products
+    
+    
+    
     categories = Categories.objects.all()
     
     # Pagination

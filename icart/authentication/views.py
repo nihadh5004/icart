@@ -31,13 +31,11 @@ def home(request):
   
    
     sliders = Slider.objects.all()
-    user = request.user
-    name = user.username
     # Retrieve the 10 latest products based on the ID
     latest_products = Product.objects.filter(is_active=True).order_by('-id')[:10] 
-    
+    print(sliders)
     context = {
-        'name': name,
+        
         'sliders': sliders,
         'latest_products': latest_products,
     }
@@ -104,9 +102,9 @@ def signup(request):
         pass1=request.POST['pass1']    
         pass2=request.POST['pass2']    
         referral=request.POST['referral']  
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists. Please use a different email.')
-            return render(request, 'authentication/signup.html')  
+        # if User.objects.filter(email=email).exists():
+        #     messages.error(request, 'Email already exists. Please use a different email.')
+        #     return render(request, 'authentication/signup.html')  
         if referral:
             try:
                 referral_code_obj = ReferralCode.objects.get(referral_code=referral)
@@ -323,12 +321,19 @@ def guest_verify_otp(request,user_for_otp):
             user_cart=UserCart.objects.get(user=myuser)
             cart_items=Cart.objects.filter(cart_id=guest_cart_id)
             for product in cart_items:
-                Cart.objects.create(
-                    cart_id=user_cart,
-                    product=product.product,
-                    quantity=product.quantity,
-                    price=product.price
-                )
+                cart_item = Cart.objects.filter(cart_id=user_cart, product=product.product).first()
+                if cart_item:
+                    # Product already exists in the cart, increase the quantity
+                    cart_item.quantity += product.quantity
+                    cart_item.price += product.price
+                    cart_item.save()
+                else:
+                    Cart.objects.create(
+                        cart_id=user_cart,
+                        product=product.product,
+                        quantity=product.quantity,
+                        price=product.price
+                    )
             del request.session['otp']
             guest_cart_id.delete()
             del request.session['cart_id']
@@ -336,3 +341,7 @@ def guest_verify_otp(request,user_for_otp):
         else:
             messages.error(request,'invalid otp')
             return redirect('signin')
+        
+        
+def o(request):
+    return render(request, 'authentication/otp_verification.html')

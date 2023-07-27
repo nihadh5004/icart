@@ -8,6 +8,7 @@ urlpatterns = [
     path('user/<int:user_id>/block/', views.block_user, name='block_user'),
     path('user/<int:user_id>/unblock/', views.unblock_user, name='unblock_user'),
     path('productlist', views.productlist  ,name='productlist'),
+    path('pending_orders', views.pending_orders  ,name='pending_orders'),
     path('categorylist', views.categorylist , name='categorylist'),
     path('create_category', views.create_category , name='create_category'),
     
@@ -36,4 +37,10 @@ urlpatterns = [
     path('add_referral', views.add_referral , name='add_referral'),
     path('edit_referral', views.edit_referral , name='edit_referral'),
     path('delete_referral', views.delete_referral , name='delete_referral'),
+    
+    path('create_banner', views.create_banner , name='create_banner'),
+    path('banners', views.banners , name='banners'),
+    path('delete_banner/<int:banner_id>' , views.delete_banner , name='delete_banner'),
+
+
 ]

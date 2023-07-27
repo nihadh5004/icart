@@ -13,7 +13,7 @@
 <div class="cart-table-area section-padding-100">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12 col-lg-8">
+            <div class="col-12 col-lg-8" style="font-family: Century Gothic;">
                 <div class="cart-title mt-50">
                     <h2>Shopping Cart</h2>
                 </div>
@@ -42,8 +42,8 @@
                                     <a href="{% url 'removecart' product.id %}"><button class="btn btn-outline-secondary mt-3">Delete</button></a>
 
                                 </td>
-                                <td class="price">
-                                    <span>${{product.price}}</span>
+                                <td class="price" >
+                                    <span id="price-{{ product.id }}">${{product.price}}</span>
                                 </td>
                                 <td class="qty">
                                     <div class="qty-btn d-flex">
@@ -52,7 +52,7 @@
                                             <span class="qty-minus" onclick="decrementQuantity({{ product.id }}, {{ product.quantity }});">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </span>
-                                            <input type="number" class="qty-text" id="qty{{ product.id }}" step="1" min="1" max="{{ product.product.stock }}" name="quantity" value="{{ product.quantity }}" onchange="updateQuantity({{ product.id }}, this.value);">
+                                            <input type="number" class="qty-text"  id="qty{{ product.id }}" step="1" min="1" max="{{ product.product.stock }}" name="quantity" value="{{ product.quantity }}" onchange="updateQuantity({{ product.id }}, this.value);">
                                             <span class="qty-plus" onclick="incrementQuantity({{ product.id }}, {{ product.quantity }}, {{ product.product.stock }});">
                                                 <i class="fa fa-plus" aria-hidden="true"></i>
                                             </span>
@@ -67,16 +67,16 @@
                     </table>
                 </div>
             </div>
-            <div class="col-12 col-lg-4">
+            <div class="col-12 col-lg-4" style="font-family: Century Gothic;">
                 <div class="cart-summary">
                     <h5>Cart Total</h5>
                     <ul class="summary-table">
-                        <li><span>subtotal:</span> <span>${{total_price}}</span></li>
+                        <li><span>subtotal:</span> <span id='total_price'>${{total_price}}</span></li>
                         <li><span>delivery:</span> <span>Free</span></li>
                         {% if cart_id.coupon  %}
                         <li><span class='font-weight-bold'>Coupon</span> <a href="{% url 'delete_coupon' cart_id.id %}"><span>{{cart_id.coupon}}</span></li></a>
                         {% endif %}
-                        <li><span>total:</span> <span>${{discount_price}}</span></li>
+                        <li><span>total:</span> <span id='discount_price'>${{discount_price}}</span></li>
                     </ul>
                     {% if not cart_id.coupon  %}
                     
@@ -117,9 +117,11 @@
             success: function(response) {
                 if (response.success) {
                     $("#price-" + productId).text(response.price);
-                    $("#quantity-" + productId).text(response.quantity);
+                    $("#qty" + productId).text(response.quantity);
+                    $("#total_price" ).text(response.total_price);
+                    $("#discount_price" ).text(response.discount_price);
                     console.log("Quantity updated successfully!");
-                    location.reload();
+                    {% comment %} location.reload(); {% endcomment %}
                 } else {
                     console.log("Quantity update failed:", response.message);
                     alert(response.message); // Display the error message to the user

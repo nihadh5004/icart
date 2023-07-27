@@ -10,35 +10,35 @@
               
               <div class="col-xl-6">
                 <div class="card-body mt-5  text-black">
-                  <h3 class="mb-5 font-weight-bold ">Login</h3>
+                  <h3 class="mb-5 font-weight-bold "  style='font-family:Century Gothic;'>Login</h3>
 
                  <form action="/signin" method='post'>
                   {% csrf_token %}
-                  <div class="form-outline mb-4  ">
-                      <label class="form-label" for="form3Example8">Username</label>
+                  <div class="form-outline mb-4  " style='font-family:Century Gothic;'>
+                      <label class="form-label" for="form3Example8" style='font-weight: bold;'>Username</label>
                     <input type="text" id="form3Example8" name='username' class="form-control form-control-lg " />
                   </div>
 
   
   
-                  <div class="form-outline mb-4 ">
-                      <label class="form-label" for="form3Example9">Enter Password</label>
+                  <div class="form-outline mb-4 " style='font-family:Century Gothic;'>
+                      <label class="form-label" for="form3Example9" style='font-weight: bold;'>Enter Password</label>
                       <input type="password" id="form3Example9" name='pass1' class="form-control form-control-lg" />
                   </div>
                 
   
-                  <div class="d-flex justify-content-center pt-3 ">
+                  <div class="d-flex justify-content-center pt-3 " style='font-family:Century Gothic;'>
                   
                     <button type="submit" class="btn btn-dark w-25  ">Sign In</button>
                   </div>
-                  <div class="col text-center py-2 ">
+                  <div class="col text-center py-2 " style='font-family:Century Gothic;'>
                     <!-- Simple link -->
                     <a class="text-dark " href="/_reset_password">Forgot password?</a>
                   </div>
-                  <div class="text-center text-lg-start pt-2">
+                  <div class="text-center text-lg-start pt-2" style='font-family:Century Gothic;'>
                     
-                    <p class="small fw-bold mt-2  mb-0">Don't have an account? <a href="/signup"
-                        class="text-dark">Sign Up</a></p>
+                    <p class="small  mt-2 text-dark mb-0">Don't have an account? <a href="/signup"
+                        class="text-dark font-weight-bold">Sign Up</a></p>
                   </div>
 
                  </form>

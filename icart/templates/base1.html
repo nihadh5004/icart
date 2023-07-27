@@ -18,6 +18,10 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Vc0ZK5rnZMOWwuTnb0MlJWh7RG5pfz1aEYrlQmSLEELcJFscK7Y6kVH+MTEx0zjZ+n8oPV4wt5WY1aegjQr8A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
     <!-- Title  -->
     <title>iCart</title>
     {% block links %}
@@ -35,51 +39,128 @@
 
       .navbar-nav .nav-link {
         line-height: 71px; /* Match the line-height to the navbar height */
+        
       }
+      .nav-icons{
+        font-size: 20px; 
+        
+      }
+      .mobile-nav{
+        z-index: 99999999;
+        
+      }
+      /* Add this CSS to make the cart item count smaller */
+      .cart-item-count {
+        font-size: 15px;
+        position: absolute;
+        top: -4px;
+        right: 1px;
+        color: black;
+        border-radius: 50%;
+      }
+
+      /* Add this CSS to align the count on top of the cart icon */
+      .nav-icons {
+        position: relative;
+      }
+
+      /* Add this CSS to adjust the position of the cart icon and count */
+      .nav-icons i {
+        margin-right: 5px;
+      }
+
+
       
-    
     </style>
 
 </head>
 
 <body style="display: flex; flex-direction: column; min-height: 100vh;">
+
   <!-- Image and text -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNRBmn2cV7dOVgAiWfLJmNrPGpG2EoA49guw&usqp=CAU" width='50' height='50' alt="">       
-    <a class="navbar-brand" href="/">ICART</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  
-    <div class="collapse navbar-collapse ml-5 " id="navbarTogglerDemo02">
-      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/">HOME <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/shop">SHOP <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/cart">CART <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/wishlist">WISHLIST <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a class="nav-link ml-5 " href="/profile_details">PROFILE <span class=""></span></a>
-        </li>
-        <li class="nav-item active">
-          <a href="#" class="search-nav nav-link ml-5 "><img src="img/core-img/search.png" alt=""> SEARCH</a>        </li>
-        
-      </ul>
+  <nav class="navbar navbar-expand-lg sticky-top  navbar-light bg-light" style="font-family: Century Gothic;">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNRBmn2cV7dOVgAiWfLJmNrPGpG2EoA49guw&usqp=CAU" width='50' height='50' alt="" >       
+    <a class="navbar-brand font-weight-bold" href="/">ICART</a>
+    
+    
+    <div class="mobile-nav ">
       
+      <!-- Navbar Brand -->
+      <div class="amado-navbar-brand sticky-top ">
+          <a href="index.html"><img src="" alt=""></a>
+      </div>
+      <!-- Navbar Toggler -->
+      <div class="amado-navbar-toggler">
+          <span></span><span></span><span></span>
+      </div>
+   </div>
+
+
+    <div class="collapse navbar-collapse ml-5" >
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link ml-5 font-weight-bold" href="/">HOME</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link ml-5 font-weight-bold" href="/shop">SHOP</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link ml-5 font-weight-bold" href="/cart">CART</i></a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link ml-5 font-weight-bold" href="/wishlist">WISHLIST <i class="fas fa-heart"></i></a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link ml-5 font-weight-bold" href="/profile_details">PROFILE </i></a>
+            </li>
+        </ul>
+        <ul class="navbar-nav nav-icons">
+          <li class="nav-item  active px-2">
+            <a href="/cart">
+              <div class="nav-link nav-icons" >
+
+                <i class="fa fa-shopping-cart nav-icons"></i></a>
+                {% if cart_item_count > 0 %}
+                <span class="cart-item-count">{{ cart_item_count }}</span>
+                {% endif %}              
+              </div>
+            </li>
+            <li class="nav-item  active px-2">
+              <a href="/wishlist">
+                <div class="nav-link nav-icons" >
+                  
+                  <i class="fa fa-heart nav-icons"></i></a>
+                  {% if wishlist_item_count > 0 %}
+                  <span class="cart-item-count">{{ wishlist_item_count }}</span>
+                  {% endif %}              
+                  </div>
+          </li>
+          {% if request.user.is_authenticated %}
+          <li class="nav-item active px-2">
+              <a href="/profile_details">
+                <div class="nav-link nav-icons user-authenticated">
+                    <i class="fa fa-user "></i>
+                    <span class='text-uppercase '>{{ request.user.username }}</span>
+                  </div>
+                </a>
+          </li>
+          {% else %}
+          <li class="nav-item  active px-2">
+          <a href="/profile_details">
+            <div class="nav-link nav-icons" >
+
+              <i class="fa fa-user nav-icons"></i></a>
+            </div>
+          </li>
+        {% endif %}
+        </ul>
     </div>
-  </nav>
-  
+</nav>
+
   
 
 {% for message in messages %}
-  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-family: Century Gothic; ">
     <strong>{{message}}</strong>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
@@ -104,7 +185,7 @@
                     <div class="search-content">
                         <form action="#" method="get">
                             <input type="search" name="search" id="search" placeholder="Type your keyword...">
-                            <button type="submit"><img src="img/core-img/search.png" alt=""></button>
+                            <button type="submit"><img src="" alt=""></button>
                         </form>
                     </div>
                 </div>
@@ -120,7 +201,7 @@
         <div class="mobile-nav ">
             <!-- Navbar Brand -->
             <div class="amado-navbar-brand">
-                <a href="index.html"><img src="img/core-img/logo.png" alt=""></a>
+                <a href="index.html"><img src="" alt=""></a>
             </div>
             <!-- Navbar Toggler -->
             <div class="amado-navbar-toggler">
@@ -129,18 +210,15 @@
         </div>
 
         <!-- Header Area Start -->
-        <header class="header-area bg-light clearfix  ">
+        <header class="header-area bg-light clearfix  "  >
             <!-- Close Icon -->
-            <div class="nav-close">
+            <div class="nav-close" >
                 <i class="fa fa-close" aria-hidden="true"></i>
             </div>
             <!-- Logo -->
-            <div class="logo d-flex ">
-                <a href="index.html"><img src="https://static.vecteezy.com/system/resources/previews/005/544/718/original/profile-icon-design-free-vector.jpg" alt="" width="40" height="40"></a>
-                <h5 class=" text-uppercase mt-2"> {{request.user.username}}</h5>
-            </div>
+           
             <!-- Amado Nav -->
-            <nav class="amado-nav ">
+            <nav class="amado-nav " style="font-family: Century Gothic;">
                 <ul>
                     <li><a href="/">Home</a></li>
                     <li><a href="/shop">Shop</a></li>
@@ -151,7 +229,7 @@
                 </ul>
             </nav>
             <!-- Button Group -->
-            <div class="amado-btn-group mt-30 mb-100">
+            <div class="amado-btn-group mt-30 mb-100" style="font-family: Century Gothic;">
               {% if request.user.is_authenticated %}
                 <a href="/signout" class="btn amado-btn  mb-15">Logout</a>
               {% else %}
@@ -159,10 +237,9 @@
               {% endif %}
             </div>
             <!-- Cart Menu -->
-            <div class="cart-fav-search mb-100">
-                <a href="/cart" class="cart-nav"><img src="img/core-img/cart.png" alt=""> Cart </a>
-                <a href="#" class="fav-nav"><img src="img/core-img/favorites.png" alt=""> Favourite</a>
-                <a href="#" class="search-nav"><img src="img/core-img/search.png" alt=""> Search</a>
+            <div class="cart-fav-search mb-100" style="font-family: Century Gothic;">
+                <a href="/cart" class="cart-nav"><img src="" alt=""> Cart({{ cart_item_count }}) </a>
+                <a href="/wishlist" class="fav-nav"><img src="" alt=""> Favourite({{wishlist_item_count}})</a>
             </div>
          
         </header>
@@ -180,29 +257,29 @@
             <!-- Grid column -->
             <div class="col-md-3 mt-3 mt-md-0 ">
               <!-- Content -->
-              <p class="h2 mt-3 footer_text">a complete<br>apple<br>solution on<br>your<br>fingertips.</p>
+              <p class="h2 mt-3 footer_text" style="font-family: Century Gothic;">a complete<br>apple<br>solution on<br>your<br>fingertips.</p>
             </div>
             <!-- Grid column -->
             <!-- Grid column -->
             <div class="col-md-6 mt-5 mb-md-0 mb-3">
               <p class="mb-2" style="font-family: Century Gothic;">Drop your email here to get the latest updates on Apple products</p>
               <div class="input-group">
-                <input type="search" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="search-addon">
+                <input type="search" class="form-control" placeholder="Enter your email here" aria-label="Search" aria-describedby="search-addon">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-outline-primary">Search</button>
+                  <button type="button" class="btn btn-outline-primary">Submit</button>
                 </div>
               </div>
             </div>
             <!-- Grid column -->
             <!-- Grid column -->
-            <div class="col-md-3 mt-5 mb-md-0 mb-3">
+            <div class="col-md-3 mt-5 mb-md-0 mb-3  ">
               <!-- Links -->
-              <h5 class="py-2 footer_text">Contact Us</h5>
+              <h5 class="py-2 footer_text ">Contact Us</h5>
               <ul class="list-unstyled">
                 <li class="footer_text">
                   icart@yahoo.co.in
                 </li>
-                <li class="footer_text">
+                <li class="footer_text ">
                   +919546293453
                 </li>
                 <li>
@@ -225,7 +302,7 @@
         </div>
         <!-- Footer Links -->
         <!-- Bottom Text -->
-        <div class="text-center py-2" style="font-family: Century Gothic; background-color: rgba(0, 0, 0, 0.2);">
+        <div class="text-right py-2" style="font-family: Century Gothic; background-color: rgba(0, 0, 0, 0.2);">
           If you need any assistance regarding Apple products, we're happy to serve you.
         </div>
         <!-- Bottom Text -->

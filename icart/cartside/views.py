@@ -1,3 +1,4 @@
+
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import *
 from django.http import HttpResponseRedirect
@@ -6,8 +7,43 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder  # Import DjangoJSONEncoder
 from django.views.decorators.cache import cache_control
+from django.core.paginator import Paginator
 
 # Create your views here.
+def addcart_wishlist(request,slug):
+    if request.user.is_authenticated:
+            user=request.user
+            cart = UserCart.objects.get(user=user)
+            quantity = 1
+            productvariant = get_object_or_404(ProductVariant, slug=slug)
+            user = request.user
+            price = Decimal(productvariant.price)
+            totalprice = price * Decimal(quantity)
+            #if the product has discount price then applying it
+            if productvariant.discount_price:
+                totalprice = productvariant.discount_price * Decimal(quantity)
+            
+            
+            if quantity > productvariant.stock:
+                # Display an error message if the quantity is greater than the stock
+                messages.error(request, 'Requested quantity is greater than available stock.')
+            else:
+                # Check if the product is already in the cart
+                cart_item = Cart.objects.filter(cart_id=cart, product=productvariant).first()
+                if cart_item:
+                    # Product already exists in the cart, increase the quantity
+                    cart_item.quantity += quantity
+                    cart_item.price += totalprice
+                    cart_item.save()
+                else:
+                    # Product does not exist in the cart, create a new cart item
+                    Cart.objects.create(cart_id=cart, product=productvariant, quantity=quantity, price=totalprice)
+                messages.success(request, 'Item Added to Cart')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return redirect('signin')
+
+            
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def addcart(request, slug):
     #if user is logged in 
@@ -22,7 +58,7 @@ def addcart(request, slug):
                 request.session['cart_id']=cart.id
             else :
                 cart=UserCart.objects.get(id=cart_id)
-        #taking the quantity as value and passing it to database   
+        #Taking the quantity as value and passing it to database   
         if request.method == 'POST':
             quantity = int(request.POST.get('quantity'))
             productvariant = get_object_or_404(ProductVariant, slug=slug)
@@ -52,7 +88,7 @@ def addcart(request, slug):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     
     
-def cart(request):
+def cart(request):  
     #Checking if the user is logged in 
         if request.user.is_authenticated:
             user=request.user
@@ -67,7 +103,7 @@ def cart(request):
                 request.session['cart_id']=cart
             cart_id=UserCart.objects.get(id=cart)
             
-        products=Cart.objects.filter(cart_id=cart_id)
+        products=Cart.objects.filter(cart_id=cart_id).order_by('-id')
         productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
         total_price = productstotal['total_price']
         #if cart doesnt have any product then redirect to shop
@@ -82,7 +118,7 @@ def cart(request):
             coupon=request.POST['coupon']
             coupon_obj=Coupon.objects.filter(coupon_code=coupon)
             #if the coupon is invalid
-            if not coupon_obj:
+            if not coupon_obj or coupon_obj[0].is_expired:
                 messages.error(request, 'Invalid Coupon')
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             # if user already entered a coupon 
@@ -101,7 +137,7 @@ def cart(request):
         #Rechecking the user doesnt deleted and reduced the cart amount less than coupon min. amount
         if cart_id.coupon:
             if cart_id.coupon.minimum_amount > total_price:
-                messages.error(request, f'Amount should be greater than  {cart_id.coupon.minimum_amount}.')
+                messages.error(request, f'Amount should be greater than  {cart_id.coupon.minimum_amount}.Coupon has been removed')
                 cart_id.coupon=None
                 cart_id.save()
         #if cart has a coupon then changing the price according to coupon 
@@ -142,6 +178,12 @@ from django.http import JsonResponse
 # Function to update quantity from cart when pressing add or minus
 def update_quantity(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.user.is_authenticated:
+            user=request.user
+            cart_id=UserCart.objects.get(user=user)
+        else:
+            id=request.session.get('cart_id')
+            cart_id=UserCart.objects.get(id=id)
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity'))  # Convert the quantity to an integer
         product = Cart.objects.get(id=product_id)
@@ -159,12 +201,20 @@ def update_quantity(request):
                 product.price = product.product.discount_price * Decimal(product.quantity)
             product.save()
             
+            productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
+            total_price = productstotal['total_price']
+            if cart_id.coupon:    
+                discount_price= total_price - cart_id.coupon.discount_price
+            else:
+                discount_price = total_price
             # Prepare the success response data
             response_data = {
                 'success': True,
                 'message': 'Quantity updated successfully!',
-                'price': product.price,
+                'price':f"${product.price}",
                 'quantity': product.quantity,
+                'total_price' : f"${total_price}" ,
+                'discount_price' : f"${discount_price}",
             }
 
         return JsonResponse(response_data)
@@ -224,8 +274,12 @@ def wishlist(request):
     wishlist=UserWishlist.objects.get(user=user)
     items=Wishlist.objects.filter(wishlist_id=wishlist)
     
+    paginator = Paginator(items, 4) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context={
-        'items': items
+        'items': page_obj
     }
     
     return render (request, 'wishlist.html', context)
