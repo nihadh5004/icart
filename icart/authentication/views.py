@@ -77,7 +77,8 @@ def signin(request):
     return render(request, 'authentication/signin.html')
 
 def verify_otp(request,user_for_otp):
-    
+    if request.user.is_authenticated:
+        return redirect ('home')
     if request.method=='POST':
         otp=request.POST['otp']
         generated_otp=request.session.get('otp')

@@ -6,6 +6,9 @@
   
 @media only screen and (max-width: 767px) {
     /* Add your custom styles here for mobile devices */
+    .carousel-caption {
+      margin-top: 80px !important; /* Adjust the padding value as per your requirement */
+  }
     .carousel-caption h3 {
         font-size: 18px; /* Adjust the font size as per your requirement */
     }
@@ -37,7 +40,7 @@
     {% for item in sliders %}
     <div class="carousel-item {% if forloop.first %}active{% endif %}" style="font-family: Century Gothic; ">
       <img src="{{ item.Image.url }}" alt="{{ item.Product.name }}" class="d-block w-100">
-      <div class="carousel-caption mb-5">
+      <div class="carousel-caption ">
         <h5 class='text-left ' style='font-family:Century Gothic;'>{{ item.Discount_deals }}</h5>
         <h1 class='text-left  text-uppercase font-weight-bold'>{{ item.Product.product.name }}</h1>
         <h3 class='text-left  py-2'>Discount sale of {{ item.Product.discount }}%</h3>

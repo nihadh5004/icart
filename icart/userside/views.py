@@ -63,9 +63,7 @@ def add_address(request):
 #editing the existing address in the checkout page
 def edit_address(request, address_id):
     if request.user.is_authenticated:
-
         address = Address.objects.get(id=address_id)
-
         if request.method == "POST":
             fullname = request.POST['fullname']
             address_text = request.POST['address']
@@ -98,13 +96,17 @@ def edit_address(request, address_id):
 
 def payment_page(request, address_id):
     if request.user.is_authenticated:
-
-        address = Address.objects.get(id=address_id)
+       
         user=request.user
-        refer_table=ReferralOffers.objects.all()
         cart_id=UserCart.objects.get(user=user)
-        wallet=Wallet.objects.get(user=user)
         products=Cart.objects.filter(cart_id=cart_id)
+        if not products:
+                messages.error(request, "Please add something to cart")
+                return redirect('home')
+        address = Address.objects.get(id=address_id)
+        
+        refer_table=ReferralOffers.objects.all()
+        wallet=Wallet.objects.get(user=user)
         productstotal = Cart.objects.filter(cart_id=cart_id).aggregate(total_price=Sum('price'))
         total_price = productstotal['total_price']
         discount_amount=0
