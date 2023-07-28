@@ -1,4 +1,4 @@
-{% extends 'base1.html' %}
+{% extends 'authentication/base.html' %}
 
 {% block links %}
 <style>
@@ -12,7 +12,7 @@
 {% endblock  %}
 {% block content %}
 
-<section class="py-5">
+{% comment %} <section class="py-5">
     <div class="container">
         <!-- FOR DEMO PURPOSE -->
         <div class="row">
@@ -50,7 +50,28 @@
         </div>
     </div>
 </section>
+       {% endcomment %}
       
-      
-  
+       <div class="container">
+        <div class="row">
+          <div class="col-md-6 offset-md-3">
+            <h2 class="text-center text-dark mt-5">OTP Verification</h2>
+            <div class="text-center mb-5 text-dark">OTP has been sent to your registered mail</div>
+            <div class="card my-5">
+    
+              <form class="card-body cardbody-color p-lg-5" action="/verify_otp/{{user_for_otp}}" method="post">
+                {% csrf_token %}
+                
+                
+                <div class="mb-3">
+                  <input type="text" class="form-control" name="otp" id="password" placeholder="Enter OTP" required>
+                </div>
+                <div class="text-center"><button type="submit" class="btn btn-color px-5 mb-5 w-100">Submit</button></div>
+                
+              </form>
+            </div>
+    
+          </div>
+        </div>
+      </div>
 {% endblock  %}

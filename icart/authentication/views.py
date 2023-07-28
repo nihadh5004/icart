@@ -176,8 +176,7 @@ def activate(request,uidb64,token):
 def signout(request):
     if request.user.is_authenticated:
         logout(request)
-        messages.success(request,"Succesfully logged out")
-        return redirect('signin')
+        return redirect('home')
     
     
 from twilio.rest import Client
@@ -305,8 +304,10 @@ def guest_verify_otp(request,user_for_otp):
         cart=request.session.get('cart_id')
         guest_cart_id=UserCart.objects.get(id=cart)
         wishlist=request.session.get('wishlist_id')
-        guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
-
+        try:
+            guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
+        except:
+            guest_wishlist_id=None
         #checking the otp entered is same as send to the email
         if otp==generated_otp:
             myuser=User.objects.get(pk=user_for_otp)
@@ -330,8 +331,9 @@ def guest_verify_otp(request,user_for_otp):
             del request.session['otp']
             guest_cart_id.delete()
             del request.session['cart_id']
-            guest_wishlist_id.delete()
-            del request.session['wishlist_id']
+            if guest_wishlist_id != None:
+                guest_wishlist_id.delete()
+                del request.session['wishlist_id']
             return redirect('cart')
         else:
             messages.error(request,'invalid otp')

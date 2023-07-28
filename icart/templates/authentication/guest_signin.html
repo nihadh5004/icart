@@ -1,56 +1,33 @@
-{% extends 'base1.html' %}
+{% extends 'authentication/base.html' %}
 
 {% block content %}
-<section class="h-100 ">
-    <div class="container py-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100" >
-        <div class="col">
-          <div class="card card-registration my-4" style="background-color:grey;">
-            <div class="row g-0">
-              
-              <div class="col-xl-6">
-                <div class="card-body mt-5  text-black">
-                  <h3 class="mb-5 font-weight-bold ">Login</h3>
+<div class="container footer_text">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <h2 class="text-center text-dark mt-5">Login Here </h2>
+      <div class="card my-5">
 
-                 <form action="/guest_signin" method='POST'>
-                  {% csrf_token %}
-                  <div class="form-outline mb-4  ">
-                      <label class="form-label" for="form3Example8">Username</label>
-                    <input type="text" id="form3Example8" name='username' class="form-control form-control-lg " />
-                  </div>
-
-  
-  
-                  <div class="form-outline mb-4 ">
-                      <label class="form-label" for="form3Example9">Enter Password</label>
-                      <input type="password" id="form3Example9" name='pass1' class="form-control form-control-lg" />
-                  </div>
-                
-  
-                  <div class="d-flex justify-content-center pt-3 ">
-                  
-                    <button type="submit" class="btn btn-dark w-25  ">Sign In</button>
-                  </div>
-                  <div class="col text-center py-2 ">
-                    <!-- Simple link -->
-                  </div>
-                  <div class="text-center text-lg-start pt-2">
-                    
-                    
-                  </div>
-
-                 </form>
-                </div>
-              </div>
-              <div class="col-xl-6 d-none d-xl-block">
-                <img src="https://img.freepik.com/premium-vector/order-online-by-phone-basket-icon-online-shopping-by-iphone-vector-illustration-buy-now-add-cart_642540-99.jpg?w=2000"
-                  alt="Sample photo" class="img-fluid"
-                  style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
-              </div>
-            </div>
+        <form class="card-body cardbody-color p-lg-5" action="/guest_signin" method='post'>
+          {% csrf_token %}
+          <div class="text-center">
+            <img src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397__340.png" class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+              width="200px" alt="profile">
           </div>
-        </div>
+
+          <div class="mb-3">
+            <input type="text" class="form-control" id="Username" name="username" aria-describedby="emailHelp"
+              placeholder="User Name" required>
+          </div>
+          <div class="mb-3">
+            <input type="password" class="form-control"  name='pass1'  id="password" placeholder="password" required>
+          </div>
+          <div class="text-center"><button type="submit" class="btn btn-color px-5 mb-5 w-100">Login</button></div>
+          
+          
+        </form>
       </div>
+
     </div>
-  </section>
+  </div>
+</div>
 {% endblock  %}
