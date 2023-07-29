@@ -1,132 +1,112 @@
 {% extends 'profile_base.html' %}
-
+{% load static %}
 {% block links %}
 <style>
 
+ 
 
-body {
-  color: #000;
-  overflow-x: hidden;
-  height: 100%;
-  background-color: #8C9EFF;
-  background-repeat: no-repeat;
-}
-
-.card {
-  z-index: 0;
-  background-color: #ECEFF1;
-  padding-bottom: 20px;
-  margin-top: 90px;
-  margin-bottom: 90px;
-  border-radius: 10px;
-}
-
-.top {
-  padding-top: 40px;
-  padding-left: 13% !important;
-  padding-right: 13% !important;
-}
-
-/*Icon progressbar*/
 #progressbar {
-  margin-bottom: 30px;
-  overflow: hidden;
-  color: #455A64;
-  padding-left: 0px;
-  margin-top: 30px;
-} 
+    margin-bottom: 3vh;
+    overflow: hidden;
+    color: rgb(252, 103, 49);
+    padding-left: 0px;
+    margin-top: 3vh
+}
 
 #progressbar li {
-  list-style-type: none;
-  font-size: 13px;
-  width: 25%;
-  float: left;
-  position: relative;
-  font-weight: 400;
+    list-style-type: none;
+    font-size: x-small;
+    width: 25%;
+    float: left;
+    position: relative;
+    font-weight: 400;
+    color: rgb(160, 159, 159);
 }
 
-#progressbar .step0:before {
-  font-family: FontAwesome;
-  content: "\f10c";
-  color: #fff;
+#progressbar #step1:before {
+    content: "";
+    color: rgb(252, 103, 49);
+    width: 5px;
+    height: 5px;
+    margin-left: 0px !important;
+    /* padding-left: 11px !important */
+}
+
+#progressbar #step2:before {
+    content: "";
+    color: #fff;
+    width: 5px;
+    height: 5px;
+    margin-left: 32%;
+}
+
+#progressbar #step3:before {
+    content: "";
+    color: #fff;
+    width: 5px;
+    height: 5px;
+    margin-right: 32% ; 
+    /* padding-right: 11px !important */
+}
+
+#progressbar #step4:before {
+    content: "";
+    color: #fff;
+    width: 5px;
+    height: 5px;
+    margin-right: 0px !important;
+    /* padding-right: 11px !important */
 }
 
 #progressbar li:before {
-  width: 40px;
-  height: 40px;
-  line-height: 45px;
-  display: block;
-  font-size: 20px;
-  background: #C5CAE9;
-  border-radius: 50%;
-  margin: auto;
-  padding: 0px;
+    line-height: 29px;
+    display: block;
+    font-size: 12px;
+    background: #ddd;
+    border-radius: 50%;
+    margin: auto;
+    z-index: -1;
+    margin-bottom: 1vh;
 }
 
-/*ProgressBar connectors*/
 #progressbar li:after {
-  content: '';
-  width: 100%;
-  height: 12px;
-  background: #C5CAE9;
-  position: absolute;
-  left: 0;
-  top: 16px;
-  z-index: -1;
+    content: '';
+    height: 2px;
+    background: #ddd;
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    margin-bottom: 2vh;
+    top: 1px;
+    z-index: 1;
+}
+.progress-track{
+    padding: 0 8%;
+}
+#progressbar li:nth-child(2):after {
+    margin-right: auto;
 }
 
-#progressbar li:last-child:after {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  position: absolute;
-  left: -50%;
+#progressbar li:nth-child(1):after {
+    margin: auto;
 }
 
-#progressbar li:nth-child(2):after, #progressbar li:nth-child(3):after {
-  left: -50%;
+#progressbar li:nth-child(3):after {
+    float: left;
+    width: 68%;
+}
+#progressbar li:nth-child(4):after {
+    margin-left: auto;
+    width: 132%;
 }
 
-#progressbar li:first-child:after {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  position: absolute;
-  left: 50%;
+#progressbar  li.active{
+    color: black;
 }
 
-#progressbar li:last-child:after {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-#progressbar li:first-child:after {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-
-/*Color number of the step and the connector before it*/
-#progressbar li.active:before, #progressbar li.active:after {
-  background: #651FFF;
-}
-
-#progressbar li.active:before {
-  font-family: FontAwesome;
-  content: "\f00c";
-}
-
-.icon {
-  width: 60px;
-  height: 60px;
-  margin-right: 15px;
-}
-
-.icon-content { 
-  padding-bottom: 20px;
-}
-
-@media screen and (max-width: 992px) {
-  .icon-content {
-      width: 50%;
-  }
+#progressbar li.active:before,
+#progressbar li.active:after {
+    background: rgb(252, 103, 49);
 }
 </style>
 {% endblock  %}
@@ -217,57 +197,34 @@ body {
                 <div class="row d-flex justify-content-center">
                 <div class="col-12">
                 {% if order.payment_status == "ORDERED" %}
-                <ul id="progressbar" class="text-center">
-                    <li class="active step0"></li>
-                    <li class=" step0"></li>
-                    <li class=" step0"></li>
-                    <li class="step0"></li>
-                </ul>
+                <div class="progress-track">
+                  <ul id="progressbar">
+                      <li class="step0 active " id="step1">Ordered</li>
+                      <li class="step0  text-center" id="step2">Shipped</li>
+                      <li class="step0  text-right" id="step3">On the way</li>
+                      <li class="step0 text-right" id="step4">Delivered</li>
+                  </ul>
+              </div>
                 {% endif %}
                 {% if order.payment_status == "SHIPPED" %}
-                <ul id="progressbar" class="text-center">
-                    <li class="active step0"></li>
-                    <li class="active step0"></li>
-                    <li class="active step0"></li>
-                    <li class="step0"></li>
-                </ul>
+                <ul id="progressbar">
+                  <li class="step0 active " id="step1">Ordered</li>
+                  <li class="step0  active text-center" id="step2">Shipped</li>
+                  <li class="step0 active text-right" id="step3">On the way</li>
+                  <li class="step0 text-right" id="step4">Delivered</li>
+              </ul>
                 {% endif %}
                 {% if order.payment_status == "DELIVERED" %}
-                <ul id="progressbar" class="text-center">
-                    <li class="active step0"></li>
-                    <li class="active step0"></li>
-                    <li class="active step0"></li>
-                    <li class=" active step0"></li>
-                </ul>
+                <ul id="progressbar">
+                  <li class="step0 active " id="step1">Ordered</li>
+                  <li class="step0 active text-center" id="step2">Shipped</li>
+                  <li class="step0 active text-right" id="step3">On the way</li>
+                  <li class="step0 active text-right" id="step4">Delivered</li>
+              </ul>
                 {% endif %}
                 </div>
             </div>
-            <div class="row justify-content-between top">
-                <div class="row d-flex icon-content">
-                    <img class="icon" src="https://i.imgur.com/9nnc9Et.png" >
-                    <div class="d-flex flex-column">
-                        <p class="font-weight-bold">Order<br>Processed</p>
-                    </div>
-                </div>
-                <div class="row d-flex icon-content">
-                    <img class="icon" src="https://i.imgur.com/u1AzR7w.png" >
-                    <div class="d-flex flex-column">
-                        <p class="font-weight-bold">Order<br>Shipped</p>
-                    </div>
-                </div>
-                <div class="row d-flex icon-content">
-                    <img class="icon" src="https://i.imgur.com/TkPm63y.png"  >
-                    <div class="d-flex flex-column">
-                        <p class="font-weight-bold">Order<br>En Route</p>
-                    </div>
-                </div>
-                <div class="row d-flex icon-content">
-                    <img class="icon" src="https://i.imgur.com/HdsziHP.png"  >
-                    <div class="d-flex flex-column">
-                        <p class="font-weight-bold">Order<br>Arrived</p>
-                    </div>
-                </div>
-            </div>
+           
             
             </div>
             </div>
@@ -461,4 +418,14 @@ toggleButton.addEventListener('click', () => {
   }
   
 </script>
+
+<script src="{% static 'js/jquery/jquery-2.2.4.min.js' %}"></script>
+<!-- Popper js -->
+<script src="{% static 'js/popper.min.js' %}"></script>
+<!-- Bootstrap js -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!-- Plugins js -->
+<script src="{% static 'js/plugins.js' %}"></script>
+<!-- Active js -->
+<script src="{% static 'js/active.js' %}"></script>
 {% endblock  %}

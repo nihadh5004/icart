@@ -10,18 +10,24 @@
       margin-top: 80px !important; /* Adjust the padding value as per your requirement */
   }
     .carousel-caption h3 {
-        font-size: 18px; /* Adjust the font size as per your requirement */
+        font-size: 10px; /* Adjust the font size as per your requirement */
     }
 
     .carousel-caption h1 {
-        font-size: 16px; /* Adjust the font size as per your requirement */
+        font-size: 10px; /* Adjust the font size as per your requirement */
     }
 
     .carousel-caption h5 {
-        font-size: 14px; /* Adjust the font size as per your requirement */
+        font-size: 10px; /* Adjust the font size as per your requirement */
     }
 
-
+    .carousel-caption button {
+      /* Add your custom styles for the button here */
+      font-size: 10px; /* Adjust the font size of the button text */
+       /* Adjust the button padding as needed */
+      
+  }
+ 
 
 }
 
@@ -44,7 +50,7 @@
         <h5 class='text-left ' style='font-family:Century Gothic;'>{{ item.Discount_deals }}</h5>
         <h1 class='text-left  text-uppercase font-weight-bold'>{{ item.Product.product.name }}</h1>
         <h3 class='text-left  py-2'>Discount sale of {{ item.Product.discount }}%</h3>
-        <a href="{% url 'product_detail' item.Product.product.slug %}?color={{ item.Product.color }}&storage={{ item.Product.storage }}" class="text-left ml-5 d-block">
+        <a href="{% url 'product_detail' item.Product.product.slug %}?color={{ item.Product.color }}&storage={{ item.Product.storage }}" class="text-left d-block">
             <button class='bg-light'><h5 class='px-2 mt-1 text-dark'>Shop Now</h5></button>
         </a>
     </div>
