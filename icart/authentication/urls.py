@@ -16,4 +16,5 @@ urlpatterns = [
    path('_reset_password', views.reset_password , name='reset_password'),
    path('res_pass/<uidb64>/<token>', views.res_pass ,name='res_pass'),
    path('update_password/<int:user_id>', views.update_password, name='update_password'),
+   path('email_send', views.email_send , name='email_send')
 ]

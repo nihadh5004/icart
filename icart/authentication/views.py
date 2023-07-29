@@ -119,7 +119,7 @@ def signup(request):
             referral_user=ReferralCode.objects.get(user=myuser)
             referral_user.referrer=referrer
             referral_user.save()
-        messages.success(request,'Please Verify Account from Your Email')
+        messages.success(request,'We have sent a link to your mail,Please Verify Account from Your Email')
         
         #email
         # subject='Welcome to icart'
@@ -145,9 +145,12 @@ def signup(request):
         email.fail_silently = True
         email.send()
        
-        return redirect('signin')
+        return redirect('email_send')
     
     return render(request,'authentication/signup.html')
+
+def email_send(request):
+    return render(request, 'authentication/email_send.html')
     
 
 def activate(request,uidb64,token):

@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-trfl^kc#(4(1rl0=8r9te$pau-(4wwiw=lqz4(p)9v-op^6%3^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['13.53.35.242', '0.0.0.0' , 'localhost' , '127.0.0.1']
 
 
 # Application definition
@@ -48,12 +48,14 @@ INSTALLED_APPS = [
     'cartside',
     'userside',
     'adminside', 
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -62,6 +64,21 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'icart.urls'
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://13.53.35.242",  # Add your IP address here
+     "http://0.0.0.0:9090",
+    "http://ec2-13-53-35-242.eu-north-1.compute.amazonaws.com",
+]
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    "http://13.53.35.242",
+    "http://0.0.0.0:9090",
+    "http://ec2-13-53-35-242.eu-north-1.compute.amazonaws.com",
+    # Add more trusted origins here
+]
+
 
 TEMPLATES = [
     {
