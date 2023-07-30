@@ -12,45 +12,6 @@
 {% endblock  %}
 {% block content %}
 
-{% comment %} <section class="py-5">
-    <div class="container">
-        <!-- FOR DEMO PURPOSE -->
-        <div class="row">
-            <div class="col-lg-6 mx-auto">
-                <header class="text-center pb-5">
-                    <h1 class="h2">OTP Verification</h1>
-                </header>
-            </div>
-        </div><!-- END -->
-
-
-        <div class="row">
-            <div class="col-lg-6 mx-auto">
-
-                <!-- CUSTOM BLOCKQUOTE -->
-                <blockquote class="blockquote blockquote-custom bg-white p-5 shadow rounded">
-                    <div class="blockquote-custom-icon bg-info shadow-sm"><p class='text-center text-white py-2'>Enter OTP</p></div>
-                   
-                    <p class="mb-0 mt-2 font-italic">Enter the otp thet has been sent to your mail. Please enter carefully if the otp gets wrong  you cant signin ."</p>
-                    <form action="/verify_otp/{{user_for_otp}}" method="post">
-                        {% csrf_token %}
-                        <div class="form-group footer_text">
-                            <label for="form2Example1">Enter OTP</label>
-                            <input type="text" id="form2Example1" name="otp" class="form-control" />
-                        </div>
-                        <button type="submit" class="btn btn-primary footer_text">Confirm</button>
-                    </form>
-                
-                    <footer class="blockquote-footer pt-4 mt-4 border-top">
-                        <cite title="Source Title"></cite>
-                    </footer>
-                </blockquote><!-- END -->
-
-            </div>
-        </div>
-    </div>
-</section>
-       {% endcomment %}
       
        <div class="container">
         <div class="row">

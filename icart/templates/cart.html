@@ -6,8 +6,23 @@
 
 
 
-
-
+<style>
+    @media (max-width: 767px) {
+        /* Adjust the font size and padding for mobile view */
+        .qty-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .qty-btn p {
+            font-size: 12px;
+        }
+        .qty-btn .quantity {
+            margin-top: 5px;
+        }
+    }
+</style>
 {% endblock  %}
 {% block content %}
 <div class="cart-table-area section-padding-100">

@@ -37,7 +37,7 @@ def checkout(request):
         return render (request, 'checkout.html', context)
     else:
         messages.error(request, 'You want signin to make an order')
-        return render(request,'authentication/guest_signin.html')
+        return render(request,'authentication/signin.html')
 
 #adding new address
 def add_address(request):

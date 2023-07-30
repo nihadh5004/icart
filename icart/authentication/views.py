@@ -82,12 +82,50 @@ def verify_otp(request,user_for_otp):
     if request.method=='POST':
         otp=request.POST['otp']
         generated_otp=request.session.get('otp')
+        cart=request.session.get('cart_id')
+        if cart:
+            guest_cart_id=UserCart.objects.get(id=cart)
+        else:
+            guest_cart_id=None
+        wishlist=request.session.get('wishlist_id')
+        try:
+            guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
+        except:
+            guest_wishlist_id=None
         #checking the otp enterd is same as send to the email
         if otp==generated_otp:
             myuser=User.objects.get(pk=user_for_otp)
             login(request,myuser)
-            del request.session['otp']
-            return redirect('home')
+            user_cart=UserCart.objects.get(user=myuser)
+            if guest_cart_id:
+                cart_items=Cart.objects.filter(cart_id=guest_cart_id)
+            else:
+                cart_items=None
+            if cart_items:
+                for product in cart_items:
+                    cart_item = Cart.objects.filter(cart_id=user_cart, product=product.product).first()
+                    if cart_item:
+                        # Product already exists in the cart, increase the quantity
+                        cart_item.quantity += product.quantity
+                        cart_item.price += product.price
+                        cart_item.save()
+                    else:
+                        Cart.objects.create(
+                            cart_id=user_cart,
+                            product=product.product,
+                            quantity=product.quantity,
+                            price=product.price
+                        )
+                del request.session['otp']
+                guest_cart_id.delete()
+                del request.session['cart_id']
+                if guest_wishlist_id != None:
+                    guest_wishlist_id.delete()
+                    del request.session['wishlist_id']
+                return redirect('cart')
+            else:
+                del request.session['otp']
+                return redirect('home')
         else:
             messages.error(request,'invalid otp')
             return redirect('signin')
@@ -101,9 +139,9 @@ def signup(request):
         pass1=request.POST['pass1']    
         pass2=request.POST['pass2']    
         referral=request.POST['referral']  
-        # if User.objects.filter(email=email).exists():
-        #     messages.error(request, 'Email already exists. Please use a different email.')
-        #     return render(request, 'authentication/signup.html')  
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists. Please use a different email.')
+            return render(request, 'authentication/signup.html')  
         if referral:
             try:
                 referral_code_obj = ReferralCode.objects.get(referral_code=referral)
@@ -161,10 +199,47 @@ def activate(request,uidb64,token):
         myuser=None
     # checking the user and token doesnt has a conflict  
     if myuser is not None and generate_token.check_token(myuser,token):
+        cart=request.session.get('cart_id')
+        if cart:
+            guest_cart_id=UserCart.objects.get(id=cart)
+        else:
+            guest_cart_id=None
+        wishlist=request.session.get('wishlist_id')
+        try:
+            guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
+        except:
+            guest_wishlist_id=None
         myuser.is_active=True
         myuser.save()
         login(request,myuser)
-        return redirect('home')
+        user_cart=UserCart.objects.get(user=myuser)
+        if guest_cart_id:
+                cart_items=Cart.objects.filter(cart_id=guest_cart_id)
+        else:
+                cart_items=None
+        if cart_items:
+            for product in cart_items:
+                cart_item = Cart.objects.filter(cart_id=user_cart, product=product.product).first()
+                if cart_item:
+                        # Product already exists in the cart, increase the quantity
+                        cart_item.quantity += product.quantity
+                        cart_item.price += product.price
+                        cart_item.save()
+                else:
+                        Cart.objects.create(
+                            cart_id=user_cart,
+                            product=product.product,
+                            quantity=product.quantity,
+                            price=product.price
+                        )
+            guest_cart_id.delete()
+            del request.session['cart_id']
+            if guest_wishlist_id != None:
+                guest_wishlist_id.delete()
+                del request.session['wishlist_id']
+            return redirect('cart')
+        else:
+            return redirect('home')
     else:
         # Delete the user if activation fails and the activation link is expired
         user_creation_time = myuser.date_joined
@@ -265,81 +340,6 @@ def update_password(request, user_id):
             messages.error(request,'Passwords didnt match, Please enter both passwords Correctly')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
   
-  
-def guest_signin(request):
-    
-    if request.method=='POST':
-        username=request.POST['username']
-        pass1=request.POST['pass1']
-        
-        user=authenticate(username=username, password=pass1)
-        
-        if user is not None:
-            generated_otp=random.randint(100000,999999)
-            request.session['otp']=str(generated_otp)
-            
-            # sending OTP through mail
-            subject = 'iCart Confirmation OTP'
-            message = f'Hello {user.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
-            from_email=settings.EMAIL_HOST_USER
-            to_list=[user.email]
-            
-            send_mail(subject,message,from_email,to_list,fail_silently=True)
-        
-            
-            # login(request, user)
-            # return redirect('home')
-            messages.success(request, 'OTP has been succesfully sent to your mail')
-            #rendering to the page where we can enter otp , also sending the primary key 
-            return render (request,'authentication/guest_otp_verification.html',{'user_for_otp':user.pk})
-        else: 
-            messages.error(request, 'invalid credentials')
-            return redirect('guest_signin')
-        
-        
-    return render(request, 'authentication/signin.html')
 
 
-def guest_verify_otp(request,user_for_otp):
-    
-    if request.method=='POST':
-        otp=request.POST['otp']
-        generated_otp=request.session.get('otp')
-        cart=request.session.get('cart_id')
-        guest_cart_id=UserCart.objects.get(id=cart)
-        wishlist=request.session.get('wishlist_id')
-        try:
-            guest_wishlist_id=UserWishlist.objects.get(id=wishlist)
-        except:
-            guest_wishlist_id=None
-        #checking the otp entered is same as send to the email
-        if otp==generated_otp:
-            myuser=User.objects.get(pk=user_for_otp)
-            login(request,myuser)
-            user_cart=UserCart.objects.get(user=myuser)
-            cart_items=Cart.objects.filter(cart_id=guest_cart_id)
-            for product in cart_items:
-                cart_item = Cart.objects.filter(cart_id=user_cart, product=product.product).first()
-                if cart_item:
-                    # Product already exists in the cart, increase the quantity
-                    cart_item.quantity += product.quantity
-                    cart_item.price += product.price
-                    cart_item.save()
-                else:
-                    Cart.objects.create(
-                        cart_id=user_cart,
-                        product=product.product,
-                        quantity=product.quantity,
-                        price=product.price
-                    )
-            del request.session['otp']
-            guest_cart_id.delete()
-            del request.session['cart_id']
-            if guest_wishlist_id != None:
-                guest_wishlist_id.delete()
-                del request.session['wishlist_id']
-            return redirect('cart')
-        else:
-            messages.error(request,'invalid otp')
-            return redirect('signin')
-         
+
