@@ -22,7 +22,7 @@
                     {% if category.id == category_id %}
                     <li class="active"><a href="?category={{ category.id }}" >{{ category.category_name }}</a></li>
                     {% else %}
-                    <li><a href="?category={{ category.id }}">{{ category.category_name }}</a></li>
+                    <li ><a href="?category={{ category.id }}">{{ category.category_name }}</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
@@ -120,7 +120,7 @@
                     <i class="fa fa-star" aria-hidden="true"></i>
                 </div>
                 <div class="cart">
-                    <a href="cart.html" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="" alt=""></a>
+                    <a href="" data-toggle="tooltip" data-placement="left" title="Add to Cart"><img src="" alt=""></a>
                 </div>
             </div>
         </div>

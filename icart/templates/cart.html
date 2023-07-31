@@ -47,7 +47,7 @@
                             {% for product in products %}
                             <tr>
                                 <td class="cart_product_img">
-                                    <a href="#"><img src="{{product.product.displayimage.url}}" alt="Product"></a>
+                                    <a href="{% url 'product_detail'  product.product.product.slug %}?color={{ product.product.color }}&storage={{ product.product.storage }}"><img src="{{product.product.displayimage.url}}" alt="Product"></a>
 
                                 </td>
                                

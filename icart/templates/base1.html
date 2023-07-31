@@ -32,6 +32,10 @@
     <link rel="icon" href="https://cdn.pixabay.com/photo/2022/08/24/23/12/apple-7408883_1280.png">
     <link rel="stylesheet" href="{% static 'css/css/core-style.css' %}">
     <link rel="stylesheet" href="{% static 'css/style1.css' %}">
+    <!-- Add this in your template's <head> section -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
+
     <style>
       .navbar {
         height: 71px; /* Adjust the desired height value */
@@ -69,7 +73,9 @@
         margin-right: 5px;
       }
 
-
+      .navbar-nav .nav-item.active .nav-link {
+        color: #fbb710; /* Change this to your desired color */
+      }
       
     </style>
 
@@ -102,22 +108,23 @@
    </div>
 
 
-    <div class="collapse navbar-collapse ml-5" >
+   {% with current_path=request.path %}
+   <div class="collapse navbar-collapse ml-5">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <li class="nav-item active">
-                <a class="nav-link ml-5 font-weight-bold" href="/">HOME</a>
+            <li class="nav-item{% if current_path == '/' %} active{% endif %}">
+              <a class="nav-link ml-5 font-weight-bold" href="/">HOME</a>
             </li>
-            <li class="nav-item active">
-                <a class="nav-link ml-5 font-weight-bold" href="/shop">SHOP</a>
+            <li class="nav-item{% if current_path == '/shop/' %} active{% endif %}">
+              <a class="nav-link ml-5 font-weight-bold" href="/shop">SHOP</a>
             </li>
-            <li class="nav-item active">
-                <a class="nav-link ml-5 font-weight-bold" href="/cart">CART</i></a>
+            <li class="nav-item{% if current_path == '/cart' %} active{% endif %}">
+              <a class="nav-link ml-5 font-weight-bold" href="/cart">CART</a>
             </li>
-            <li class="nav-item active">
-                <a class="nav-link ml-5 font-weight-bold" href="/wishlist">WISHLIST <i class="fas fa-heart"></i></a>
+            <li class="nav-item{% if current_path == '/wishlist' %} active{% endif %}">
+              <a class="nav-link ml-5 font-weight-bold" href="/wishlist">WISHLIST </a>
             </li>
-            <li class="nav-item active">
-                <a class="nav-link ml-5 font-weight-bold" href="/profile_details">PROFILE </i></a>
+            <li class="nav-item{% if current_path == '/profile_details' %} active{% endif %}">
+              <a class="nav-link ml-5 font-weight-bold" href="/profile_details">PROFILE </i></a>
             </li>
         </ul>
         <ul class="navbar-nav nav-icons">
@@ -142,7 +149,7 @@
                   </div>
           </li>
           {% if request.user.is_authenticated %}
-          <li class="nav-item active px-2">
+          <li class="nav-item  px-2">
               <a href="/profile_details">
                 <div class="nav-link nav-icons user-authenticated">
                     <i class="fa fa-user "></i>
@@ -161,18 +168,12 @@
         {% endif %}
         </ul>
     </div>
+    {% endwith %}
 </nav>
 
   
 
-{% for message in messages %}
-  <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-family: Century Gothic; ">
-    <strong>{{message}}</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-{% endfor %} 
+
 {% block home_slider %}
 {% endblock  %}
 
@@ -314,6 +315,31 @@
         <!-- Bottom Text -->
       </footer>
       
+<!-- Add this at the end of your template, before the closing </body> tag -->
+<!-- Add this at the end of your template, before the closing </body> tag -->
+<script>
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'success' %}
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: '{{ message }}',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      {% elif message.tags == 'error' %}
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: '{{ message }}',
+          showConfirmButton: true
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</script>
+
 
 
     

@@ -142,6 +142,12 @@ def signup(request):
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Email already exists. Please use a different email.')
             return render(request, 'authentication/signup.html')  
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists. Please choose a different username.')
+            return render(request, 'authentication/signup.html')
+        if pass1 != pass2:
+            messages.error(request, 'Passwords do not match. Please re-enter the passwords.')
+            return render(request, 'authentication/signup.html')
         if referral:
             try:
                 referral_code_obj = ReferralCode.objects.get(referral_code=referral)

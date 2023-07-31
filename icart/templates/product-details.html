@@ -25,7 +25,7 @@
             display: none; /* Hide the carousel for computer view */
         }
     }
-  
+    
   </style>
 
 {% endblock %}
@@ -43,7 +43,7 @@
                             <ol class="breadcrumb mt-50"  style="font-family: Century Gothic; font-weight: bold;">
                                 <li class="breadcrumb-item"><a href="/shop">Shop</a></li>
                                 <li class="breadcrumb-item"><a href="/shop?category={{product.category.id}}">{{product.category}}</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">{{product.name}}</li>
+                                <li class="breadcrumb-item active" aria-current="page" style="color:  #fbb710;">{{product.name}}</li>
                             </ol>
                         </nav>
                     </div>
@@ -299,16 +299,24 @@
                method: "POST",
                headers: { "X-CSRFToken": "{{ csrf_token }}" },
                data: { slug: variantSlug  },
-               success: function(response) {
-    
-                 alert("item added to wishlist")
-                 
-    
-                 
-               },
-               error: function(xhr, status, error) {
-                 console.log("Failed to add:", error);
-               }
+               success: function (response) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Success!',
+                  text: 'Item added to wishlist',
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+              },
+              error: function (xhr, status, error) {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Failed to add item to wishlist',
+                  showConfirmButton: true
+                });
+                console.log("Failed to add:", error);
+              }
              });
         }
         
@@ -319,16 +327,24 @@
                method: "POST",
                headers: { "X-CSRFToken": "{{ csrf_token }}" },
                data: { slug: variantSlug  },
-               success: function(response) {
-    
-                 alert("item removed from wishlist")
-                 
-    
-                 
-               },
-               error: function(xhr, status, error) {
-                 console.log("Failed to add:", error);
-               }
+               success: function (response) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Success!',
+                  text: 'Item removed from wishlist',
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+              },
+              error: function (xhr, status, error) {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Failed to add item to wishlist',
+                  showConfirmButton: true
+                });
+                console.log("Failed to add:", error);
+              }
              });
         }
     </script>

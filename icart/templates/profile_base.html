@@ -18,6 +18,10 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Add this in your template's <head> section -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
+
     <!-- Title  -->
     <title>iCart</title>
     {% block links %}
@@ -25,7 +29,7 @@
     {% endblock  %}
 
     <!-- Favicon  -->
-    <link rel="icon" href="img/core-img/favicon.ico">
+    <link rel="icon" href="https://cdn.pixabay.com/photo/2022/08/24/23/12/apple-7408883_1280.png">
     <link rel="stylesheet" href="{% static 'css/css/core-style.css' %}">
     <link rel="stylesheet" href="{% static 'css/style1.css' %}">
     <style>
@@ -37,7 +41,9 @@
         line-height: 71px; /* Match the line-height to the navbar height */
       }
       
-    
+      .navbar-nav .nav-item.active .nav-link {
+        color: #fbb710; /* Change this to your desired color */
+      }
     </style>
 
 </head>
@@ -47,7 +53,7 @@
 {% endblock  %}
 <nav class="navbar navbar-expand-lg sticky-top  navbar-light bg-light" style="font-family: Century Gothic;">
   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNRBmn2cV7dOVgAiWfLJmNrPGpG2EoA49guw&usqp=CAU" width='50' height='50' alt="" >       
-  <a class="navbar-brand font-weight-bold" href="/">ICART</a>
+  
   
   
   <div class="mobile-nav ">
@@ -65,16 +71,16 @@
 
   <div class="collapse navbar-collapse ml-5" >
       <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-          <li class="nav-item active">
+          <li class="nav-item ">
               <a class="nav-link ml-5 font-weight-bold" href="/">HOME</a>
           </li>
-          <li class="nav-item active">
+          <li class="nav-item ">
               <a class="nav-link ml-5 font-weight-bold" href="/shop">SHOP</a>
           </li>
-          <li class="nav-item active">
+          <li class="nav-item ">
               <a class="nav-link ml-5 font-weight-bold" href="/cart">CART</i></a>
           </li>
-          <li class="nav-item active">
+          <li class="nav-item ">
               <a class="nav-link ml-5 font-weight-bold" href="/wishlist">WISHLIST <i class="fas fa-heart"></i></a>
           </li>
           <li class="nav-item active">
@@ -82,7 +88,7 @@
           </li>
       </ul>
       <ul class="navbar-nav nav-icons">
-        <li class="nav-item  active px-2">
+        <li class="nav-item   px-2">
           <a href="/cart">
             <div class="nav-link nav-icons" >
 
@@ -92,7 +98,7 @@
               {% endif %}              
             </div>
         </li>
-        <li class="nav-item  active px-2">
+        <li class="nav-item   px-2">
               <a href="/wishlist">
                 <div class="nav-link nav-icons" >
 
@@ -100,7 +106,7 @@
                 </div>
         </li>
         {% if request.user.is_authenticated %}
-        <li class="nav-item active px-2">
+        <li class="nav-item  px-2">
             <a href="/profile_details">
               <div class="nav-link nav-icons user-authenticated">
                   <i class="fa fa-user "></i>
@@ -122,14 +128,7 @@
 </nav>
 
  
-{% for message in messages %}
-  <div class="alert alert-warning alert-dismissible fade show" role="alert">
-    <strong>{{message}}</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-{% endfor %} 
+ 
 {% block home_slider %}
 {% endblock  %}
 
@@ -275,7 +274,28 @@
       </footer>
     </div>   
 
-
+    <script>
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'success' %}
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: '{{ message }}',
+              showConfirmButton: false,
+              timer: 1500
+            });
+          {% elif message.tags == 'error' %}
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: '{{ message }}',
+              showConfirmButton: true
+            });
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </script>
     
 
 </body>
