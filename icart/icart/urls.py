@@ -18,6 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import render
+
+
+def custom_page_not_found_view(request, exception):
+    return render(request, 'errors/404.html', status=404)
+
+def custom_server_error_view(request):
+    return render(request, 'errors/500.html', status=500)
+
+handler404 = custom_page_not_found_view
+handler500 = custom_server_error_view
 
 
 urlpatterns = [

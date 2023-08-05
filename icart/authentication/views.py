@@ -122,7 +122,7 @@ def verify_otp(request,user_for_otp):
                 if guest_wishlist_id != None:
                     guest_wishlist_id.delete()
                     del request.session['wishlist_id']
-                return redirect('cart')
+                return redirect('home')
             else:
                 del request.session['otp']
                 return redirect('home')
@@ -243,7 +243,7 @@ def activate(request,uidb64,token):
             if guest_wishlist_id != None:
                 guest_wishlist_id.delete()
                 del request.session['wishlist_id']
-            return redirect('cart')
+            return redirect('home')
         else:
             return redirect('home')
     else:
